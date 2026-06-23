@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libxslt-dev \
     curl \
+    tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
