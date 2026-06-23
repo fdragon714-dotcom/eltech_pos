@@ -28,6 +28,13 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
+# Fix for Coolify/Docker HTTPS reverse proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# CSRF Trusted Origins (add your domain in Coolify env variables, e.g. https://domain.com)
+csrf_env = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
+CSRF_TRUSTED_ORIGINS = [url.strip() for url in csrf_env.split(',') if url.strip()]
+
 
 # Application definition
 
