@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libxml2-dev \
     libxslt-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
@@ -25,7 +26,7 @@ RUN apt-get update && apt-get install -y dos2unix && rm -rf /var/lib/apt/lists/*
 RUN iconv -f UTF-16LE -t UTF-8 requirements.txt > requirements_utf8.txt || cp requirements.txt requirements_utf8.txt
 RUN pip install --upgrade pip && \
     pip install -r requirements_utf8.txt && \
-    pip install gunicorn whitenoise
+    pip install gunicorn whitenoise Pillow
 
 # Copy project
 COPY . /app/
@@ -35,6 +36,10 @@ RUN dos2unix /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Expose port
 EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8000/ || exit 1
 
 # Run entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]
