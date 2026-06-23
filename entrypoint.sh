@@ -8,8 +8,9 @@ python manage.py migrate --noinput
 # Check if we need to load seed data
 # We check if the auth_user table is empty. If it is, we assume it's a fresh database.
 echo "Checking if we need to load seed data..."
-python manage.py shell -c "from django.contrib.auth.models import User; exit(0 if User.objects.exists() else 1)"
-if [ $? -eq 1 ]; then
+if python manage.py shell -c "from django.contrib.auth.models import User; exit(0 if User.objects.exists() else 1)"; then
+    echo "Data already exists, skipping seed data loading."
+else
     echo "Database is empty. Loading seed data..."
     if [ -f seed_data.json ]; then
         python manage.py loaddata seed_data.json
@@ -17,8 +18,6 @@ if [ $? -eq 1 ]; then
     else
         echo "seed_data.json not found, skipping."
     fi
-else
-    echo "Data already exists, skipping seed data loading."
 fi
 
 # Collect static files
