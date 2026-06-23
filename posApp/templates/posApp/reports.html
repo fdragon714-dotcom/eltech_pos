@@ -1,0 +1,362 @@
+{% extends "posApp/base.html" %}
+{% load humanize %}
+{% block pageContent %}
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --rep-primary: #2563eb; --rep-success: #16a34a; --rep-danger: #dc2626;
+        --rep-warning: #d97706; --rep-dark: #0f172a; --rep-border: #e2e8f0;
+        --rep-muted: #64748b; --rep-bg: #f8fafc;
+    }
+
+    .report-wrapper { 
+        font-family: 'Inter', sans-serif; 
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        padding: 24px 30px;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    /* Header */
+    .report-header {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--rep-border);
+        flex-wrap: wrap; gap: 12px;
+    }
+    .report-header h3 { font-size: 1.4rem; font-weight: 800; color: var(--rep-dark); margin: 0; }
+    .report-header p { color: var(--rep-muted); font-size: 0.85rem; margin: 4px 0 0; }
+
+    /* Filter Bar */
+    .filter-bar {
+        background: #fff; border: 1px solid var(--rep-border); border-radius: 12px;
+        padding: 16px 20px; display: flex; align-items: flex-end; gap: 14px;
+        flex-wrap: wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 20px;
+    }
+    .filter-bar label { font-size: 0.78rem; font-weight: 700; color: var(--rep-muted); display: block; margin-bottom: 4px; }
+    .filter-bar input[type="date"] {
+        border: 1px solid var(--rep-border); border-radius: 8px; padding: 8px 12px;
+        font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--rep-dark);
+    }
+    .btn-filter {
+        background: var(--rep-primary); color: #fff; border: none; border-radius: 8px;
+        padding: 9px 20px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: 0.2s;
+    }
+    .btn-filter:hover { background: #1d4ed8; }
+    .btn-print {
+        background: #fff; color: var(--rep-dark); border: 1.5px solid var(--rep-border);
+        border-radius: 8px; padding: 9px 18px; font-weight: 700; font-size: 0.9rem;
+        cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+    }
+    .btn-print:hover { background: var(--rep-bg); }
+
+    /* Tabs */
+    .tab-nav {
+        display: flex; gap: 4px; border-bottom: 2px solid var(--rep-border);
+        margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .tab-btn {
+        padding: 10px 18px; font-weight: 600; font-size: 0.88rem; color: var(--rep-muted);
+        background: none; border: none; border-bottom: 3px solid transparent;
+        cursor: pointer; transition: 0.2s; margin-bottom: -2px; white-space: nowrap;
+    }
+    .tab-btn.active { color: var(--rep-primary); border-bottom-color: var(--rep-primary); }
+    .tab-btn:hover:not(.active) { color: var(--rep-dark); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Summary Cards */
+    .summary-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px; margin-bottom: 20px;
+    }
+    .summary-card {
+        background: #fff; border: 1px solid var(--rep-border); border-radius: 12px;
+        padding: 16px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .summary-card .label { font-size: 0.75rem; font-weight: 700; color: var(--rep-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .summary-card .value { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; font-weight: 800; margin-top: 4px; }
+    .summary-card.success .value { color: var(--rep-success); }
+    .summary-card.danger .value  { color: var(--rep-danger); }
+    .summary-card.warning .value { color: var(--rep-warning); }
+    .summary-card.primary .value { color: var(--rep-primary); }
+    .summary-card.dark .value    { color: var(--rep-dark); }
+
+    /* Tables */
+    .report-table-wrap { background: #fff; border: 1px solid var(--rep-border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .report-table-wrap .table-title { padding: 14px 18px; font-weight: 700; font-size: 0.95rem; color: var(--rep-dark); border-bottom: 1px solid var(--rep-border); display: flex; align-items: center; gap: 8px; }
+    .table-report { width: 100%; border-collapse: collapse; }
+    .table-report thead th {
+        background: var(--rep-bg); color: var(--rep-muted); font-size: 0.72rem; font-weight: 700;
+        text-transform: uppercase; padding: 10px 14px; text-align: left; letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--rep-border);
+    }
+    .table-report tbody td { padding: 11px 14px; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .table-report tbody tr:last-child td { border-bottom: none; }
+    .table-report tbody tr:hover td { background: #fafbff; }
+    .table-report .mono { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+    .table-report .text-success { color: var(--rep-success); }
+    .table-report .text-danger  { color: var(--rep-danger); }
+    .table-report .text-warning { color: var(--rep-warning); }
+    .table-report tfoot td { padding: 12px 14px; font-weight: 800; background: #f1f5f9; font-size: 0.9rem; }
+
+    /* Supplier card */
+    .supplier-card {
+        background: #fff; border: 1px solid var(--rep-border); border-radius: 12px;
+        margin-bottom: 16px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .supplier-card-header {
+        padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;
+        background: var(--rep-bg); border-bottom: 1px solid var(--rep-border);
+    }
+    .supplier-card-header .name { font-weight: 700; font-size: 1rem; color: var(--rep-dark); }
+    .supplier-card-header .total { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1rem; color: var(--rep-primary); }
+
+    /* Badge */
+    .badge-stock { padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+    .badge-in  { background: #dcfce7; color: #15803d; }
+    .badge-out { background: #fee2e2; color: #dc2626; }
+    .badge-ret { background: #fef9c3; color: #92400e; }
+
+
+</style>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+<div class="report-wrapper">
+
+    <!-- Header -->
+    <div class="report-header">
+        <div>
+            <h3>📊 Laporan Manajemen</h3>
+            <p>Periode: <strong>{{ date_from }}</strong> s/d <strong>{{ date_to }}</strong></p>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <form method="GET" class="filter-bar">
+        <div>
+            <label>Dari Tanggal</label>
+            <input type="date" name="date_from" value="{{ date_from }}">
+        </div>
+        <div>
+            <label>Sampai Tanggal</label>
+            <input type="date" name="date_to" value="{{ date_to }}">
+        </div>
+        <button type="submit" class="btn-filter">
+            <i class="material-icons" style="font-size:16px; vertical-align:middle;">filter_alt</i> Terapkan Filter
+        </button>
+    </form>
+
+    <!-- Tabs -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab(this, 'tab-labarugi')">💰 Laba Rugi</button>
+        <button class="tab-btn" onclick="switchTab(this, 'tab-mutasi')">🔄 Mutasi Stok</button>
+        <button class="tab-btn" onclick="switchTab(this, 'tab-supplier')">🤝 Rekap Supplier</button>
+        <button class="tab-btn" onclick="switchTab(this, 'tab-stok')">🏭 Stok Akhir</button>
+    </div>
+
+    <!-- ===================== TAB 1: LABA RUGI ===================== -->
+    <div id="tab-labarugi" class="tab-content active">
+        <div class="summary-grid">
+            <div class="summary-card primary">
+                <div class="label">Total Penjualan</div>
+                <div class="value">Rp {{ laba_rugi.total_penjualan|floatformat:0|intcomma }}</div>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">{{ laba_rugi.jumlah_transaksi }} transaksi</div>
+            </div>
+            <div class="summary-card warning">
+                <div class="label">Total HPP (Modal)</div>
+                <div class="value">Rp {{ laba_rugi.total_hpp|floatformat:0|intcomma }}</div>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Harga Pokok Penjualan</div>
+            </div>
+            <div class="summary-card dark">
+                <div class="label">Laba Kotor</div>
+                <div class="value">Rp {{ laba_rugi.laba_kotor|floatformat:0|intcomma }}</div>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Penjualan - HPP</div>
+            </div>
+            <div class="summary-card danger">
+                <div class="label">Biaya Garansi/Servis</div>
+                <div class="value">Rp {{ laba_rugi.total_garansi|floatformat:0|intcomma }}</div>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Klaim garansi</div>
+            </div>
+            <div class="summary-card {% if laba_rugi.laba_bersih >= 0 %}success{% else %}danger{% endif %}">
+                <div class="label">✨ Laba Bersih</div>
+                <div class="value">Rp {{ laba_rugi.laba_bersih|floatformat:0|intcomma }}</div>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Laba Kotor - Garansi</div>
+            </div>
+        </div>
+
+        <div class="report-table-wrap">
+            <div class="table-title"><i class="material-icons" style="color:#2563eb; font-size:18px;">receipt_long</i> Ringkasan Laporan Laba Rugi</div>
+            <table class="table-report">
+                <thead><tr><th>Keterangan</th><th class="text-end">Jumlah</th></tr></thead>
+                <tbody>
+                    <tr><td>Total Pendapatan Penjualan ({{ laba_rugi.jumlah_transaksi }} transaksi)</td><td class="mono text-end text-success">Rp {{ laba_rugi.total_penjualan|floatformat:0|intcomma }}</td></tr>
+                    <tr><td>(-) Harga Pokok Penjualan (HPP)</td><td class="mono text-end text-danger">Rp {{ laba_rugi.total_hpp|floatformat:0|intcomma }}</td></tr>
+                    <tr style="font-weight:700"><td>= Laba Kotor</td><td class="mono text-end">Rp {{ laba_rugi.laba_kotor|floatformat:0|intcomma }}</td></tr>
+                    <tr><td>(-) Biaya Garansi & Servis</td><td class="mono text-end text-danger">Rp {{ laba_rugi.total_garansi|floatformat:0|intcomma }}</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>✨ Laba Bersih Periode Ini</td>
+                        <td class="mono text-end {% if laba_rugi.laba_bersih >= 0 %}text-success{% else %}text-danger{% endif %}">Rp {{ laba_rugi.laba_bersih|floatformat:0|intcomma }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===================== TAB 2: MUTASI STOK ===================== -->
+    <div id="tab-mutasi" class="tab-content">
+        <div class="report-table-wrap">
+            <div class="table-title"><i class="material-icons" style="color:#2563eb; font-size:18px;">swap_vert</i> Laporan Mutasi Stok Produk</div>
+            <table class="table-report">
+                <thead>
+                    <tr>
+                        <th>Produk</th>
+                        <th class="text-center">Stok Masuk</th>
+                        <th class="text-center">Terjual</th>
+                        <th class="text-center">Diretur</th>
+                        <th class="text-center">Stok Akhir</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in mutasi_list %}
+                    <tr>
+                        <td>
+                            <div style="font-weight:700; font-size:0.85rem;">{{ m.product.name }}</div>
+                            <div style="font-size:0.72rem; color:#94a3b8;">{{ m.product.code }}</div>
+                        </td>
+                        <td class="text-center">
+                            {% if m.total_masuk > 0 %}<span class="badge-stock badge-in">+{{ m.total_masuk|floatformat:0 }}</span>{% else %}—{% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if m.total_keluar > 0 %}<span class="badge-stock badge-out">-{{ m.total_keluar|floatformat:0 }}</span>{% else %}—{% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if m.total_retur > 0 %}<span class="badge-stock badge-ret">-{{ m.total_retur|floatformat:0 }}</span>{% else %}—{% endif %}
+                        </td>
+                        <td class="text-center mono" style="font-weight:800;">{{ m.stok_akhir }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center" style="padding:30px; color:#94a3b8;">Tidak ada pergerakan stok pada periode ini.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===================== TAB 3: REKAP SUPPLIER ===================== -->
+    <div id="tab-supplier" class="tab-content">
+        {% if supplier_rekap %}
+            {% for sup_name, sup_data in supplier_rekap.items %}
+            <div class="supplier-card">
+                <div class="supplier-card-header">
+                    <div>
+                        <div class="name">🤝 {{ sup_name }}</div>
+                        <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">{{ sup_data.count }} transaksi barang masuk</div>
+                    </div>
+                    <div class="total">Rp {{ sup_data.total|floatformat:0|intcomma }}</div>
+                </div>
+                <table class="table-report">
+                    <thead><tr><th>Kode BM</th><th>Tanggal</th><th class="text-end">Total Nilai</th></tr></thead>
+                    <tbody>
+                        {% for item in sup_data.items %}
+                        <tr>
+                            <td><span class="mono" style="font-size:0.8rem;">{{ item.code }}</span></td>
+                            <td>{{ item.date_added|date:"d M Y, H:i" }}</td>
+                            <td class="mono text-end text-primary">Rp {{ item.grand_total|floatformat:0|intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="report-table-wrap" style="padding:40px; text-align:center; color:#94a3b8;">
+                Tidak ada data barang masuk pada periode ini.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- ===================== TAB 4: STOK AKHIR ===================== -->
+    <div id="tab-stok" class="tab-content">
+        <div class="summary-grid">
+            <div class="summary-card warning">
+                <div class="label">Total Nilai HPP (Modal)</div>
+                <div class="value">Rp {{ total_nilai_hpp|floatformat:0|intcomma }}</div>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Total aset berdasarkan HPP</div>
+            </div>
+            <div class="summary-card primary">
+                <div class="label">Total Nilai Jual</div>
+                <div class="value">Rp {{ total_nilai_jual|floatformat:0|intcomma }}</div>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Potensi jika semua terjual</div>
+            </div>
+            <div class="summary-card success">
+                <div class="label">Potensi Keuntungan</div>
+                <div class="value">Rp {{ total_potensi_profit|floatformat:0|intcomma }}</div>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Jika seluruh stok habis terjual</div>
+            </div>
+        </div>
+
+        <div class="report-table-wrap">
+            <div class="table-title"><i class="material-icons" style="color:#2563eb; font-size:18px;">inventory</i> Nilai Inventaris Saat Ini</div>
+            <table class="table-report">
+                <thead>
+                    <tr>
+                        <th>Produk</th>
+                        <th class="text-center">Stok</th>
+                        <th class="text-end">HPP / Unit</th>
+                        <th class="text-end">Harga Jual</th>
+                        <th class="text-end">Nilai HPP</th>
+                        <th class="text-end">Nilai Jual</th>
+                        <th class="text-end">Potensi Profit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in stok_akhir_list %}
+                    <tr>
+                        <td>
+                            <div style="font-weight:700; font-size:0.85rem;">{{ item.product.name }}</div>
+                            <div style="font-size:0.72rem; color:#94a3b8;">{{ item.product.code }}</div>
+                        </td>
+                        <td class="text-center mono" style="font-weight:800;">{{ item.stok }}</td>
+                        <td class="text-end mono" style="font-size:0.82rem;">Rp {{ item.hpp|floatformat:0|intcomma }}</td>
+                        <td class="text-end mono" style="font-size:0.82rem;">Rp {{ item.harga_jual|floatformat:0|intcomma }}</td>
+                        <td class="text-end mono text-warning">Rp {{ item.nilai_hpp|floatformat:0|intcomma }}</td>
+                        <td class="text-end mono text-primary">Rp {{ item.nilai_jual|floatformat:0|intcomma }}</td>
+                        <td class="text-end mono {% if item.potensi_profit >= 0 %}text-success{% else %}text-danger{% endif %}" style="font-weight:800;">Rp {{ item.potensi_profit|floatformat:0|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center" style="padding:30px; color:#94a3b8;">Belum ada produk.</td></tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4">TOTAL NILAI INVENTARIS</td>
+                        <td class="mono text-end text-warning">Rp {{ total_nilai_hpp|floatformat:0|intcomma }}</td>
+                        <td class="mono text-end text-primary">Rp {{ total_nilai_jual|floatformat:0|intcomma }}</td>
+                        <td class="mono text-end text-success">Rp {{ total_potensi_profit|floatformat:0|intcomma }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+</div>
+</div>
+
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<script>
+    function switchTab(btn, tabId) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+</script>
+{% endblock ScriptBlock %}

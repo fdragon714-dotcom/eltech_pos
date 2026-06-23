@@ -1,0 +1,235 @@
+{% extends "posApp/base.html" %} 
+{% load humanize %} 
+{% load static %}  
+{% block pageContent %}
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --c-dark: #0f172a; --c-primary: #3b82f6; --c-primary-hover: #2563eb;
+        --c-success: #10b981; --c-danger: #ef4444; --c-border: #cbd5e1; 
+        --c-bg-light: #f8fafc; --c-text-muted: #64748b;
+    }
+    body { background-color: #f1f5f9; }
+
+    /* Custom Select2 Styling */
+    .select2-container--default .select2-selection--single {
+        height: 42px; border-radius: 8px; border: 1px solid var(--c-border);
+        display: flex; align-items: center; padding-left: 8px; font-weight: 500; font-family: 'Inter', sans-serif;
+    }
+    .select2-container--default .select2-selection--single:focus { border-color: var(--c-primary); outline: none; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 40px; }
+
+    .dashboard-header {
+        display: flex; justify-content: space-between; align-items: flex-end;
+        margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--c-border);
+    }
+
+    .pos-layout { display: flex; flex-wrap: wrap; gap: 20px; }
+
+    .left-panel {
+        flex: 1; display: flex; flex-direction: column; gap: 10px;
+        background: #ffffff; border-radius: 12px; border: 1px solid var(--c-border);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding: 20px;
+    }
+
+    .right-panel {
+        width: 360px; display: flex; flex-direction: column; gap: 10px;
+        background: #ffffff; border-radius: 12px; border: 1px solid var(--c-border);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding: 20px;
+    }
+
+    .section-title {
+        font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--c-dark);
+        margin-bottom: 5px; display: flex; align-items: center; gap: 8px; white-space: nowrap;
+        border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;
+    }
+
+    .form-group label {
+        font-weight: 600; font-size: 0.85rem; color: var(--c-text-muted); margin-bottom: 6px; display: block;
+    }
+    .form-control, .form-select {
+        border-radius: 8px; border: 1px solid var(--c-border); padding: 10px 12px;
+        font-family: 'Inter', sans-serif; font-size: 0.95rem; width: 100%;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); outline: none;
+    }
+
+    .btn-save {
+        background: var(--c-danger); color: white; border: none; border-radius: 8px; padding: 14px;
+        font-weight: 700; font-size: 1rem; width: 100%; margin-top: auto; cursor: pointer; transition: 0.2s;
+        display: flex; justify-content: center; align-items: center; gap: 8px;
+    }
+    .btn-save:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+</style>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="w-100">
+        <div class="dashboard-header">
+            <div>
+                <h4 class="mb-1 fw-bold text-dark">Form Manajemen Retur</h4>
+                <p class="text-muted small mb-0">{% if ret_obj.id %}Edit Data Retur{% else %}Tambah Retur Barang Baru{% endif %}</p>
+            </div>
+            <div>
+                <a class="btn btn-light shadow-sm" href="{% url 'returns-page' %}" style="border-radius: 8px; font-weight: 600;">
+                    <i class="material-icons" style="vertical-align: middle;">arrow_back</i> Kembali
+                </a>
+            </div>
+        </div>
+
+        <form id="return-form">
+            <input type="hidden" name="id" value="{% if ret_obj.id %}{{ret_obj.id}}{% endif %}">
+            <div class="pos-layout">
+                
+                <!-- LEFT PANEL: Item Details -->
+                <div class="left-panel">
+                    <div class="section-title">
+                        <i class="material-icons text-danger">inventory_2</i> Pilih Barang Rusak / Retur
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label>Produk yang Diretur</label>
+                        <select name="product_id" id="product_id" class="form-select select2" required style="width: 100%;">
+                            <option value="" disabled selected>Ketik nama atau kode produk...</option>
+                            {% for prod in products %}
+                                <option value="{{ prod.id }}" {% if ret_obj.product_id.id == prod.id %}selected{% endif %} data-stock="{{ prod.stock }}">
+                                    {{ prod.code }} - {{ prod.name }} (Stok Tersedia: {{ prod.stock }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-4">
+                                <label>Jumlah Unit (Qty)</label>
+                                <input type="number" name="qty" id="qty" class="form-control text-center fs-5 fw-bold text-danger" required min="1" value="{% if ret_obj.qty %}{{ret_obj.qty}}{% else %}1{% endif %}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label>Alasan Retur / Detail Kerusakan</label>
+                        <textarea name="reason" id="reason" class="form-control" rows="5" required placeholder="Contoh: Layar bergaris merah, keyboard mati sebelah kanan, dll.">{% if ret_obj.reason %}{{ret_obj.reason}}{% endif %}</textarea>
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL: Action & Supplier -->
+                <div class="right-panel">
+                    <div class="section-title">
+                        <i class="material-icons text-primary">assignment_return</i> Tujuan & Tindakan
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label>Pilih Jenis Tindakan</label>
+                        <select name="type" id="type" class="form-select" required style="font-weight: 600;">
+                            <option value="Barang Rusak/Gudang" {% if ret_obj.type == 'Barang Rusak/Gudang' %}selected{% endif %}>
+                                📦 Simpan sebagai Barang Rusak (Gudang)
+                            </option>
+                            <option value="Kembalikan ke Supplier" {% if ret_obj.type == 'Kembalikan ke Supplier' %}selected{% endif %}>
+                                🚚 Kembalikan ke Supplier (Retur/Refund)
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-4" id="supplier-container" style="display: none; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid var(--c-border);">
+                        <label>Referensi Barang Masuk (Opsi Supplier)</label>
+                        <select name="supplier_id" id="supplier_id" class="form-select select2" style="width: 100%;">
+                            <option value="" selected>Cari berdasarkan Riwayat Barang Masuk...</option>
+                            {% for pur in purchases %}
+                                <option value="{{ pur.supplier_id.id }}" {% if ret_obj.supplier_id.id == pur.supplier_id.id %}selected{% endif %}>
+                                    [{{ pur.code }}] {{ pur.supplier_id.name }} ({{ pur.date_added|date:"d M Y" }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted mt-2 d-block" style="font-size: 0.75rem;">Opsi diambil dari Riwayat Barang Masuk. Retur akan dikirimkan ke supplier terkait.</small>
+                    </div>
+
+                    <button type="submit" class="btn-save" id="btn-save">
+                        <i class="material-icons">save</i> Simpan Data Retur
+                    </button>
+                </div>
+                
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<script>
+    $(function() {
+        // Initialize Select2
+        $('.select2').select2();
+
+        function toggleSupplier() {
+            if ($('#type').val() === 'Kembalikan ke Supplier') {
+                $('#supplier-container').slideDown();
+                $('#supplier_id').attr('required', true);
+            } else {
+                $('#supplier-container').slideUp();
+                $('#supplier_id').attr('required', false);
+                $('#supplier_id').val('').trigger('change');
+            }
+        }
+
+        $('#type').change(toggleSupplier);
+        toggleSupplier();
+
+        $('#return-form').submit(function(e) {
+            e.preventDefault();
+            var _this = $(this);
+            $('.err-msg').remove();
+            
+            // Validasi Stok
+            var selectedProd = $('#product_id').find(':selected');
+            if(!selectedProd.val()) return;
+            var maxStock = parseInt(selectedProd.data('stock'));
+            var inputQty = parseInt($('#qty').val());
+            
+            {% if not ret_obj.id %}
+            if (inputQty > maxStock) {
+                Swal.fire({ icon: 'warning', title: 'Stok Tidak Cukup', text: 'Kuantitas retur melebihi stok yang ada di gudang (' + maxStock + ').' });
+                return false;
+            }
+            {% endif %}
+            
+            start_loader();
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: "{% url 'save-return-page' %}",
+                data: new FormData($(this)[0]),
+                cache: false, contentType: false, processData: false,
+                method: 'POST', type: 'POST', dataType: 'json',
+                error: err => {
+                    console.log(err);
+                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Terjadi kesalahan teknis.' });
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp.status == 'success') {
+                        Swal.fire({
+                            icon: 'success', 
+                            title: 'Berhasil!',
+                            text: 'Data retur telah disimpan dan stok telah diperbarui.',
+                            showConfirmButton: false, 
+                            timer: 1500,
+                            customClass: { popup: 'swal-premium-popup' }
+                        }).then(() => { 
+                            window.location.href = "{% url 'returns-page' %}";
+                        });
+                    } else if (resp.status == 'failed' && !!resp.msg) {
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: resp.msg });
+                        end_loader();
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Oops...', text: 'Terjadi kesalahan yang tidak diketahui.' });
+                        end_loader();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock ScriptBlock %}

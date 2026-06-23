@@ -1,0 +1,716 @@
+[
+{
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$1200000$Awff5F46TwsREbVKFtvEZ8$lcwy8hhuCSYxy1+4fpFrZR+ROBkqaWCpFCSjVTKh+Vo=",
+        "last_login": "2026-06-22T13:54:32.049Z",
+        "is_superuser": true,
+        "username": "admin",
+        "first_name": "Administrator",
+        "last_name": "",
+        "email": "admin@admin.com",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2022-03-04T01:27:51Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$1200000$kcdUVqpjUK4RVB7PJ8J55Z$OkD/2eNFlUuvZkGfp4IMoP8OreutdC3okKA87McCKtQ=",
+        "last_login": "2026-06-22T13:52:18.736Z",
+        "is_superuser": false,
+        "username": "kasir",
+        "first_name": "Kasir",
+        "last_name": "",
+        "email": "kasir@kasir.com",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2026-04-07T07:37:23Z",
+        "groups": [],
+        "user_permissions": [
+            [
+                "view_salesitems",
+                "posApp",
+                "salesitems"
+            ]
+        ]
+    }
+},
+{
+    "model": "posApp.category",
+    "pk": 13,
+    "fields": {
+        "name": "LENOVO",
+        "description": "Second",
+        "image": "category_images/cropped_logo.png",
+        "status": 1,
+        "date_added": "2026-04-27T11:16:52.297Z",
+        "date_updated": "2026-06-20T17:18:41.153Z"
+    }
+},
+{
+    "model": "posApp.category",
+    "pk": 14,
+    "fields": {
+        "name": "ASUS",
+        "description": "Second",
+        "image": "category_images/cropped_logo_HOFyDa0.png",
+        "status": 1,
+        "date_added": "2026-04-30T16:42:41.168Z",
+        "date_updated": "2026-05-13T08:18:28.688Z"
+    }
+},
+{
+    "model": "posApp.category",
+    "pk": 15,
+    "fields": {
+        "name": "DELL",
+        "description": "Second",
+        "image": "category_images/cropped_logo_q9pe9dW.png",
+        "status": 1,
+        "date_added": "2026-04-30T16:44:00.011Z",
+        "date_updated": "2026-05-13T08:19:26.741Z"
+    }
+},
+{
+    "model": "posApp.category",
+    "pk": 16,
+    "fields": {
+        "name": "ACER",
+        "description": "Second",
+        "image": "category_images/cropped_logo_qjE2ri7.png",
+        "status": 1,
+        "date_added": "2026-04-30T16:44:42.459Z",
+        "date_updated": "2026-05-13T08:21:33.228Z"
+    }
+},
+{
+    "model": "posApp.category",
+    "pk": 17,
+    "fields": {
+        "name": "HP",
+        "description": "Second",
+        "image": "category_images/cropped_logo_lUSQhTH.png",
+        "status": 1,
+        "date_added": "2026-04-30T16:45:25.061Z",
+        "date_updated": "2026-05-13T08:26:29.510Z"
+    }
+},
+{
+    "model": "posApp.categorytype",
+    "pk": 1,
+    "fields": {
+        "category": 13,
+        "name": "Thinkpad",
+        "image": "type_images/cropped_logo_hBay7ft.png"
+    }
+},
+{
+    "model": "posApp.categorytype",
+    "pk": 2,
+    "fields": {
+        "category": 13,
+        "name": "Loq Gaming",
+        "image": "type_images/cropped_logo.png"
+    }
+},
+{
+    "model": "posApp.categorytype",
+    "pk": 3,
+    "fields": {
+        "category": 14,
+        "name": "Tuff Gaming",
+        "image": "type_images/cropped_logo_Svo9TJ0.png"
+    }
+},
+{
+    "model": "posApp.categorytype",
+    "pk": 4,
+    "fields": {
+        "category": 14,
+        "name": "VivoBook",
+        "image": "type_images/cropped_logo_mvtNUMi.png"
+    }
+},
+{
+    "model": "posApp.categorytype",
+    "pk": 5,
+    "fields": {
+        "category": 15,
+        "name": "Latitude",
+        "image": "type_images/cropped_logo_PiBv4qY.png"
+    }
+},
+{
+    "model": "posApp.categorytype",
+    "pk": 6,
+    "fields": {
+        "category": 16,
+        "name": "Nitro",
+        "image": "type_images/cropped_logo_fLiTsGy.png"
+    }
+},
+{
+    "model": "posApp.categorytype",
+    "pk": 7,
+    "fields": {
+        "category": 17,
+        "name": "EliteBook",
+        "image": "type_images/cropped_logo_Fz8vKMb.png"
+    }
+},
+{
+    "model": "posApp.categorytype",
+    "pk": 8,
+    "fields": {
+        "category": 13,
+        "name": "IdeaPad",
+        "image": ""
+    }
+},
+{
+    "model": "posApp.products",
+    "pk": 13,
+    "fields": {
+        "code": "LEN-000001",
+        "category_id": 13,
+        "name": "THINKPAD X13",
+        "description": "▪️Kondisi\r\n✅ Second mulus semua berfungsi normal\r\n✅ Lulus Quality Control teknisi berpengalaman\r\n✅ Bergaransi\r\n\r\n➡️Spesifikasi\r\n✅ Processor Intel® Core™ i5-10310u\r\n✅ Ram 16 GB DDR4\r\n✅ SSD 256 GB NVMe\r\n✅ windows 11 pro 64~bit\r\n✅ Display 13,3 inch FHD\r\n✅ Intel UHD Graphics\r\n✅ Touchscreen\r\n✅ Camera\r\n\r\n📦Kelengkapan\r\n✅ Unit + Charger original\r\n🎁 El-Tech Gift\r\n✅ Free mouse wireless\r\n✅ Free mouse pad\r\n✅ Free Tas Laptop",
+        "price": 5000000.0,
+        "hpp": 4200000.0,
+        "status": 1,
+        "stock": 0,
+        "image": "product_images/product_cropped_KRKoA1a.jpg",
+        "warranty": 60,
+        "date_added": "2026-04-27T11:44:42.746Z",
+        "date_updated": "2026-06-22T12:58:36.664Z"
+    }
+},
+{
+    "model": "posApp.products",
+    "pk": 14,
+    "fields": {
+        "code": "ACE-000002",
+        "category_id": 16,
+        "name": "NITRO 16 AN16-14",
+        "description": "▪️Kondisi\r\n✅ Second mulus semua berfungsi normal\r\n✅ Lulus Quality Control teknisi berpengalaman\r\n✅ Bergaransi\r\n\r\n➡️Spesifikasi\r\n✅ Processor AMD Ryzen 7 7735HS\r\n✅ Ram 32 GB DDR5\r\n✅ SSD 1000 GB NVMe\r\n✅ windows 11 pro 64~bit\r\n✅ Display 16 inch WUXGA\r\n✅ Nvidia RTX 4050 6GB\r\n✅ Keyboard Backlit\r\n✅ Camera\r\n\r\n📦Kelengkapan\r\n✅ Unit + Charger original\r\n🎁 El-Tech Gift\r\n✅ Free mouse wireless\r\n✅ Free mouse pad\r\n✅ Free Tas Laptop",
+        "price": 12500000.0,
+        "hpp": 11000000.0,
+        "status": 1,
+        "stock": 0,
+        "image": "product_images/product_cropped_hy1SBfy.jpg",
+        "warranty": 30,
+        "date_added": "2026-04-30T16:51:54.988Z",
+        "date_updated": "2026-06-22T14:08:37.234Z"
+    }
+},
+{
+    "model": "posApp.products",
+    "pk": 15,
+    "fields": {
+        "code": "ASU-000003",
+        "category_id": 14,
+        "name": "TUFF GAMING A15",
+        "description": "▪️ Kondisi\r\n✅ Second mulus semua berfungsi normal\r\n✅ Lulus Quality Control teknisi berpengalaman\r\n✅ Bergaransi\r\n\r\n➡️ Spesifikasi\r\n✅ Processor AMD Ryzen 7 7435HS\r\n✅ RAM 16 GB DDR5\r\n✅ SSD 512 GB NVMe\r\n✅ Windows 11\r\n✅ Display 15,6 inch FHD 144Hz\r\n✅ Nvidia RTX 3050 4GB\r\n✅ Keyboard Backlit\r\n✅ Camera\r\n\r\n📦 Kelengkapan\r\n✅ Unit + Charger original\r\n🎁 El-Tech Gift\r\n✅ Free mouse wireless\r\n✅ Free mouse pad\r\n✅ Free Tas Laptop",
+        "price": 9500000.0,
+        "hpp": 8000000.0,
+        "status": 1,
+        "stock": 1,
+        "image": "product_images/product_cropped_hWepHQB.jpg",
+        "warranty": 30,
+        "date_added": "2026-04-30T16:56:13.330Z",
+        "date_updated": "2026-06-21T13:55:51.581Z"
+    }
+},
+{
+    "model": "posApp.products",
+    "pk": 16,
+    "fields": {
+        "code": "ASU-000004",
+        "category_id": 14,
+        "name": "VIVOBOOK M415D",
+        "description": "▪️ Kondisi\r\n✅ Second mulus semua berfungsi normal\r\n✅ Lulus Quality Control teknisi berpengalaman\r\n✅ Bergaransi\r\n\r\n➡️ Spesifikasi\r\n✅ Processor AMD Ryzen 3 3250u\r\n✅ RAM 8 GB DDR4\r\n✅ SSD 512 GB NVMe\r\n✅ Windows 11\r\n✅ Display 14 inch FHD\r\n✅ AMD Radeon Graphics\r\n✅ Keyboard Backlit\r\n✅ Camera\r\n\r\n📦 Kelengkapan\r\n✅ Unit + Charger original\r\n🎁 El-Tech Gift\r\n✅ Free mouse wireless\r\n✅ Free mouse pad\r\n✅ Free Tas Laptop",
+        "price": 4500000.0,
+        "hpp": 4000000.0,
+        "status": 1,
+        "stock": 1,
+        "image": "product_images/product_cropped_18Uqx1Z.jpg",
+        "warranty": 30,
+        "date_added": "2026-04-30T16:59:31.566Z",
+        "date_updated": "2026-06-22T13:59:37.022Z"
+    }
+},
+{
+    "model": "posApp.products",
+    "pk": 17,
+    "fields": {
+        "code": "ASU-000005",
+        "category_id": 14,
+        "name": "VIVOBOOK X441MA",
+        "description": "▪️ Kondisi\r\n✅ Second mulus semua berfungsi normal\r\n✅ Lulus Quality Control teknisi berpengalaman\r\n✅ Bergaransi\r\n\r\n➡️ Spesifikasi\r\n✅ Prosesor: Intel Celeron N4000\r\n✅ RAM: 4 GB DDR4\r\n✅ SSD: 128 GB + HDD 1 TB\r\n✅ Windows 11\r\n✅ Display: 14 inch HD\r\n✅ Intel UHD Graphics\r\n✅ Camera\r\n✅ Keyboard\r\n\r\n📦 Kelengkapan\r\n✅ Unit + Charger original\r\n🎁 El-Tech Gift\r\n✅ Free mouse wireless\r\n✅ Free mouse pad\r\n✅ Free Tas Laptop",
+        "price": 3000000.0,
+        "hpp": 2300000.0,
+        "status": 1,
+        "stock": 1,
+        "image": "product_images/product_cropped_qxrLTc3.jpg",
+        "warranty": 30,
+        "date_added": "2026-04-30T17:03:41.694Z",
+        "date_updated": "2026-06-22T14:00:42.420Z"
+    }
+},
+{
+    "model": "posApp.products",
+    "pk": 19,
+    "fields": {
+        "code": "DEL-000006",
+        "category_id": 15,
+        "name": "LATITUDE 7400",
+        "description": "▪️Kondisi\r\n✅ Second semua berfungsi normal\r\n✅ Lulus Quality Control teknisi berpengalaman\r\n✅ Bergaransi\r\n\r\n➡️Spesifikasi\r\n✅ Processor Intel® Core™ i7-8665u\r\n✅ Ram 8 GB DDR4\r\n✅ SSD 512 GB NVMe\r\n✅ windows 10 pro 64~bit\r\n✅ Display 14 inch HD\r\n✅ Intel UHD Graphics\r\n✅ Camera\r\n\r\n📦Kelengkapan\r\n✅ Unit + Charger original\r\n🎁 El-Tech Gift\r\n✅ Free mouse wireless\r\n✅ Free mouse pad\r\n✅ Free Tas Laptop",
+        "price": 4300000.0,
+        "hpp": 3800000.0,
+        "status": 1,
+        "stock": 1,
+        "image": "product_images/product_cropped_b6AOZo3.jpg",
+        "warranty": 30,
+        "date_added": "2026-04-30T17:12:42.797Z",
+        "date_updated": "2026-06-22T14:02:24.114Z"
+    }
+},
+{
+    "model": "posApp.products",
+    "pk": 20,
+    "fields": {
+        "code": "LEN-000007",
+        "category_id": 13,
+        "name": "THINKPAD L13 YOGA GEN 2",
+        "description": "▪️Kondisi\r\n✅ Second mulus semua berfungsi normal\r\n✅ Lulus Quality Control teknisi berpengalaman\r\n✅ Bergaransi\r\n\r\n➡️Spesifikasi\r\n✅ Processor Intel® Core™ i5-1145G7\r\n✅ RAM 16 GB DDR4 3200MHz\r\n✅ SSD NVMe 256 GB\r\n✅ windows 11 pro 64~bit\r\n✅ Display 13,3 inch (1920 x 1080)\r\n✅ Intel® iris Xe Graphics\r\n✅ Wi-Fi 6\r\n✅ Touchscreen\r\n✅ Lipat 360°\r\n✅ Finger print scanner\r\n\r\n📦Kelengkapan\r\n✅ Unit + Charger original\r\n🎁 El-Tech Gift\r\n✅ Free mouse wireless\r\n✅ Free mouse pad\r\n✅ Free Tas Laptop",
+        "price": 6500000.0,
+        "hpp": 5000000.0,
+        "status": 1,
+        "stock": 1,
+        "image": "product_images/product_cropped_1gRb36T.jpg",
+        "warranty": 30,
+        "date_added": "2026-04-30T17:15:58.371Z",
+        "date_updated": "2026-06-22T16:23:12.401Z"
+    }
+},
+{
+    "model": "posApp.products",
+    "pk": 22,
+    "fields": {
+        "code": "HP-000008",
+        "category_id": 17,
+        "name": "ELITEBOOK 845 G8",
+        "description": "▪️ Kondisi\r\n✅ Second mulus semua berfungsi normal\r\n✅ Lulus Quality Control teknisi berpengalaman\r\n✅ Bergaransi\r\n\r\n➡️ Spesifikasi\r\n✅ Prosesor: AMD Ryzen 5 Pro 5650u\r\n✅ RAM: 16 GB DDR4\r\n✅ SSD: 256 GB NVMe\r\n✅ Windows 11\r\n✅ Display: 14 inch FHD\r\n✅ AMD Radeon Graphics\r\n✅ Camera\r\n✅ Keyboard Backlit\r\n\r\n📦 Kelengkapan\r\n✅ Unit + Charger original\r\n🎁 El-Tech Gift\r\n✅ Free mouse wireless\r\n✅ Free mouse pad\r\n✅ Free Tas Laptop",
+        "price": 6800000.0,
+        "hpp": 0.0,
+        "status": 1,
+        "stock": 0,
+        "image": "product_images/product_cropped_FvSwhJU.jpg",
+        "warranty": 30,
+        "date_added": "2026-04-30T17:20:50.648Z",
+        "date_updated": "2026-06-20T17:15:13.710Z"
+    }
+},
+{
+    "model": "posApp.products",
+    "pk": 23,
+    "fields": {
+        "code": "LEN-000009",
+        "category_id": 13,
+        "name": "LOQ GAMING 15IAX9",
+        "description": "Siap, berikut adalah deskripsi untuk Lenovo LOQ 15IAX9 yang disesuaikan dengan spesifikasi pada gambar:\r\n\r\n▪️ Kondisi\r\n✅ Second mulus semua berfungsi normal\r\n✅ Lulus Quality Control teknisi berpengalaman\r\n✅ Bergaransi\r\n\r\n➡️ Spesifikasi\r\n✅ Prosesor: Intel Core i5-12450HX\r\n✅ RAM: 12 GB DDR5\r\n✅ SSD: 512 GB M.2\r\n✅ Windows 11\r\n✅ Display: 15,6 inch FHD 144Hz\r\n✅ Nvidia RTX 3050 6GB\r\n✅ Camera\r\n✅ Keyboard Backlit\r\n\r\n📦 Kelengkapan\r\n✅ Unit + Charger original\r\n🎁 El-Tech Gift\r\n✅ Free mouse wireless\r\n✅ Free mouse pad\r\n✅ Free Tas Laptop",
+        "price": 10500000.0,
+        "hpp": 0.0,
+        "status": 1,
+        "stock": 0,
+        "image": "product_images/product_cropped_PD5hIoG.jpg",
+        "warranty": 30,
+        "date_added": "2026-04-30T17:22:47.596Z",
+        "date_updated": "2026-06-20T17:15:13.712Z"
+    }
+},
+{
+    "model": "posApp.sales",
+    "pk": 385,
+    "fields": {
+        "code": "202600001",
+        "sub_total": 5000000.0,
+        "grand_total": 5000000.0,
+        "diskon_amount": 0.0,
+        "diskon": 0.0,
+        "tendered_amount": 5000000.0,
+        "amount_change": 0.0,
+        "payment_method": "qris",
+        "customer_name": "",
+        "customer_wa": "",
+        "customer_address": "",
+        "cashier": [
+            "admin"
+        ],
+        "date_added": "2026-06-22T09:32:09.635Z",
+        "date_updated": "2026-06-22T09:32:09.651Z"
+    }
+},
+{
+    "model": "posApp.sales",
+    "pk": 386,
+    "fields": {
+        "code": "202600002",
+        "sub_total": 5000000.0,
+        "grand_total": 5000000.0,
+        "diskon_amount": 0.0,
+        "diskon": 0.0,
+        "tendered_amount": 5000000.0,
+        "amount_change": 0.0,
+        "payment_method": "Tunai",
+        "customer_name": "",
+        "customer_wa": "",
+        "customer_address": "",
+        "cashier": [
+            "kasir"
+        ],
+        "date_added": "2026-06-22T12:58:36.644Z",
+        "date_updated": "2026-06-22T12:58:36.645Z"
+    }
+},
+{
+    "model": "posApp.sales",
+    "pk": 387,
+    "fields": {
+        "code": "202600003",
+        "sub_total": 12500000.0,
+        "grand_total": 12500000.0,
+        "diskon_amount": 0.0,
+        "diskon": 0.0,
+        "tendered_amount": 12500000.0,
+        "amount_change": 0.0,
+        "payment_method": "Tunai",
+        "customer_name": "",
+        "customer_wa": "",
+        "customer_address": "",
+        "cashier": [
+            "admin"
+        ],
+        "date_added": "2026-06-22T14:08:37.209Z",
+        "date_updated": "2026-06-22T14:08:37.213Z"
+    }
+},
+{
+    "model": "posApp.salesitems",
+    "pk": 350,
+    "fields": {
+        "sale_id": 385,
+        "product_id": 13,
+        "price": 5000000.0,
+        "hpp": 4200000.0,
+        "qty": 1.0,
+        "total": 5000000.0
+    }
+},
+{
+    "model": "posApp.salesitems",
+    "pk": 351,
+    "fields": {
+        "sale_id": 386,
+        "product_id": 13,
+        "price": 5000000.0,
+        "hpp": 4200000.0,
+        "qty": 1.0,
+        "total": 5000000.0
+    }
+},
+{
+    "model": "posApp.salesitems",
+    "pk": 352,
+    "fields": {
+        "sale_id": 387,
+        "product_id": 14,
+        "price": 12500000.0,
+        "hpp": 11000000.0,
+        "qty": 1.0,
+        "total": 12500000.0
+    }
+},
+{
+    "model": "posApp.supplier",
+    "pk": 6,
+    "fields": {
+        "name": "Pemasok Umum",
+        "contact": null,
+        "address": null,
+        "status": 1,
+        "date_added": "2026-06-21T12:21:28.686Z",
+        "date_updated": "2026-06-21T12:21:28.692Z"
+    }
+},
+{
+    "model": "posApp.supplier",
+    "pk": 7,
+    "fields": {
+        "name": "Irvan",
+        "contact": "088647347344",
+        "address": "Sungai Raya",
+        "status": 1,
+        "date_added": "2026-06-21T12:23:08.717Z",
+        "date_updated": "2026-06-21T12:23:08.718Z"
+    }
+},
+{
+    "model": "posApp.supplier",
+    "pk": 8,
+    "fields": {
+        "name": "Dalvin",
+        "contact": "08467362453",
+        "address": "Merdeka",
+        "status": 1,
+        "date_added": "2026-06-21T12:25:46.895Z",
+        "date_updated": "2026-06-21T12:25:46.895Z"
+    }
+},
+{
+    "model": "posApp.supplier",
+    "pk": 9,
+    "fields": {
+        "name": "Uray",
+        "contact": "0876744656385",
+        "address": "Sungai Jawi",
+        "status": 1,
+        "date_added": "2026-06-21T13:36:57.320Z",
+        "date_updated": "2026-06-21T13:36:57.320Z"
+    }
+},
+{
+    "model": "posApp.supplier",
+    "pk": 10,
+    "fields": {
+        "name": "Valentino",
+        "contact": "0874736473577",
+        "address": "Sungai Raya",
+        "status": 1,
+        "date_added": "2026-06-22T13:59:36.986Z",
+        "date_updated": "2026-06-22T13:59:36.986Z"
+    }
+},
+{
+    "model": "posApp.supplier",
+    "pk": 11,
+    "fields": {
+        "name": "Aryo",
+        "contact": "0863253767833",
+        "address": "Jeruju",
+        "status": 1,
+        "date_added": "2026-06-22T14:00:42.393Z",
+        "date_updated": "2026-06-22T14:00:42.393Z"
+    }
+},
+{
+    "model": "posApp.supplier",
+    "pk": 12,
+    "fields": {
+        "name": "Deny",
+        "contact": "0847637463397",
+        "address": "Ampera",
+        "status": 1,
+        "date_added": "2026-06-22T14:02:24.084Z",
+        "date_updated": "2026-06-22T14:02:24.084Z"
+    }
+},
+{
+    "model": "posApp.supplier",
+    "pk": 13,
+    "fields": {
+        "name": "Wahyu",
+        "contact": "0865436436474",
+        "address": "Kuala Dua",
+        "status": 1,
+        "date_added": "2026-06-22T14:03:42.725Z",
+        "date_updated": "2026-06-22T14:03:42.725Z"
+    }
+},
+{
+    "model": "posApp.purchases",
+    "pk": 6,
+    "fields": {
+        "code": "IBSRF08TNH",
+        "supplier_id": 7,
+        "grand_total": 8400000.0,
+        "date_added": "2026-06-21T12:23:08.730Z",
+        "date_updated": "2026-06-21T12:23:08.733Z"
+    }
+},
+{
+    "model": "posApp.purchases",
+    "pk": 7,
+    "fields": {
+        "code": "VZ32MIAN46",
+        "supplier_id": 8,
+        "grand_total": 11000000.0,
+        "date_added": "2026-06-21T12:25:46.905Z",
+        "date_updated": "2026-06-21T12:25:46.905Z"
+    }
+},
+{
+    "model": "posApp.purchases",
+    "pk": 8,
+    "fields": {
+        "code": "0E28VJ3AIL",
+        "supplier_id": 9,
+        "grand_total": 8000000.0,
+        "date_added": "2026-06-21T13:36:57.333Z",
+        "date_updated": "2026-06-21T13:36:57.333Z"
+    }
+},
+{
+    "model": "posApp.purchases",
+    "pk": 9,
+    "fields": {
+        "code": "J8ROMWXCRN",
+        "supplier_id": 10,
+        "grand_total": 4000000.0,
+        "date_added": "2026-06-22T13:59:36.998Z",
+        "date_updated": "2026-06-22T13:59:36.999Z"
+    }
+},
+{
+    "model": "posApp.purchases",
+    "pk": 10,
+    "fields": {
+        "code": "FN010I9LQ0",
+        "supplier_id": 11,
+        "grand_total": 2300000.0,
+        "date_added": "2026-06-22T14:00:42.399Z",
+        "date_updated": "2026-06-22T14:00:42.400Z"
+    }
+},
+{
+    "model": "posApp.purchases",
+    "pk": 11,
+    "fields": {
+        "code": "59B4LCG3C3",
+        "supplier_id": 12,
+        "grand_total": 3800000.0,
+        "date_added": "2026-06-22T14:02:24.090Z",
+        "date_updated": "2026-06-22T14:02:24.091Z"
+    }
+},
+{
+    "model": "posApp.purchases",
+    "pk": 12,
+    "fields": {
+        "code": "AIDS4BTGQ6",
+        "supplier_id": 13,
+        "grand_total": 10000000.0,
+        "date_added": "2026-06-22T14:03:42.735Z",
+        "date_updated": "2026-06-22T14:03:42.735Z"
+    }
+},
+{
+    "model": "posApp.purchaseitems",
+    "pk": 4,
+    "fields": {
+        "purchase_id": 6,
+        "product_id": 13,
+        "price": 4200000.0,
+        "qty": 2.0,
+        "total": 8400000.0
+    }
+},
+{
+    "model": "posApp.purchaseitems",
+    "pk": 5,
+    "fields": {
+        "purchase_id": 7,
+        "product_id": 14,
+        "price": 11000000.0,
+        "qty": 1.0,
+        "total": 11000000.0
+    }
+},
+{
+    "model": "posApp.purchaseitems",
+    "pk": 6,
+    "fields": {
+        "purchase_id": 8,
+        "product_id": 15,
+        "price": 8000000.0,
+        "qty": 1.0,
+        "total": 8000000.0
+    }
+},
+{
+    "model": "posApp.purchaseitems",
+    "pk": 7,
+    "fields": {
+        "purchase_id": 9,
+        "product_id": 16,
+        "price": 4000000.0,
+        "qty": 1.0,
+        "total": 4000000.0
+    }
+},
+{
+    "model": "posApp.purchaseitems",
+    "pk": 8,
+    "fields": {
+        "purchase_id": 10,
+        "product_id": 17,
+        "price": 2300000.0,
+        "qty": 1.0,
+        "total": 2300000.0
+    }
+},
+{
+    "model": "posApp.purchaseitems",
+    "pk": 9,
+    "fields": {
+        "purchase_id": 11,
+        "product_id": 19,
+        "price": 3800000.0,
+        "qty": 1.0,
+        "total": 3800000.0
+    }
+},
+{
+    "model": "posApp.purchaseitems",
+    "pk": 10,
+    "fields": {
+        "purchase_id": 12,
+        "product_id": 20,
+        "price": 5000000.0,
+        "qty": 2.0,
+        "total": 10000000.0
+    }
+},
+{
+    "model": "posApp.warrantyclaim",
+    "pk": 3,
+    "fields": {
+        "sale_id": 385,
+        "product_id": 13,
+        "description": "Baterai",
+        "cost": 200000.0,
+        "status": 1,
+        "date_added": "2026-06-22T18:48:56.889Z",
+        "date_updated": "2026-06-22T18:48:56.891Z"
+    }
+},
+{
+    "model": "posApp.returns",
+    "pk": 3,
+    "fields": {
+        "product_id": 20,
+        "supplier_id": 13,
+        "type": "Kembalikan ke Supplier",
+        "qty": 1,
+        "reason": "Baterai rusak",
+        "date_added": "2026-06-22T16:23:12.420Z",
+        "date_updated": "2026-06-22T16:23:12.425Z"
+    }
+}
+]

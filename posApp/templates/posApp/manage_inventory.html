@@ -1,0 +1,59 @@
+{% load l10n %}
+<div class="container-fluid">
+    <form action="" id="inventory-form">
+        <input type="hidden" name="id" value="{% if product.pk %}{{product.pk}}{% endif %}">
+        <div class="form-group mb-3">
+            <label for="name" class="control-label">Produk</label>
+            <input type="text" class="form-control form-control-sm rounded-0" value="{{ product.name }}" disabled>
+        </div>
+        <div class="form-group mb-3">
+            <label for="stock" class="control-label">Jumlah Stok</label>
+            <input type="number" name="stock" id="stock" class="form-control form-control-sm rounded-0" value="{% if product.stock %}{{product.stock}}{% else %}0{% endif %}" required>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(function() {
+        $('#inventory-form').submit(function(e) {
+            e.preventDefault();
+            var _this = $(this)
+            $('.err-msg').remove();
+            start_loader();
+            $.ajax({
+                headers: {
+                    "X-CSRFToken": '{{csrf_token}}'
+                },
+                url: "{% url 'save-inventory-page' %}",
+                data: new FormData($(this)[0]),
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST',
+                dataType: 'json',
+                error: err => {
+                    console.log(err)
+                    alert_toast("An error occured", 'error');
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp.status == 'success') {
+                        location.reload()
+                    } else if (resp.status == 'failed' && !!resp.msg) {
+                        var el = $('<div>')
+                        el.addClass("alert alert-danger err-msg").text(resp.msg)
+                        _this.prepend(el)
+                        el.show('slow')
+                        $("html, body, .modal").scrollTop(0);
+                        end_loader()
+                    } else {
+                        alert_toast("An error occured", 'error');
+                        end_loader();
+                        console.log(resp)
+                    }
+                }
+            })
+        })
+    })
+</script>

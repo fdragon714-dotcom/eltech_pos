@@ -1,0 +1,182 @@
+<style>
+    /* ============================================================ */
+    /* FORM STYLING KHUSUS KLAIM GARANSI                           */
+    /* ============================================================ */
+    :root {
+        --pf-primary: #2563eb;
+        --pf-surface: #f8fafc;
+        --pf-border: #e2e8f0;
+        --pf-text: #1e293b;
+    }
+    
+    .gw-wrapper { font-family: 'Inter', system-ui, sans-serif; padding: 10px; }
+    
+    .gw-group { margin-bottom: 20px; }
+    
+    .gw-label { 
+        display: block; font-weight: 700; color: #475569; 
+        font-size: 0.85rem; margin-bottom: 6px; letter-spacing: 0.3px; 
+    }
+    
+    .gw-input {
+        width: 100%; padding: 12px 16px; border: 1.5px solid var(--pf-border);
+        border-radius: 10px; background: #ffffff; color: var(--pf-text);
+        font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;
+    }
+    .gw-input:focus { border-color: var(--pf-primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); outline: none; }
+    
+    .gw-hint { font-size: 0.75rem; color: #94a3b8; margin-top: 6px; font-weight: 500; display: block; }
+
+    /* Custom Select2 Styling untuk mencocokkan input modern */
+    .select2-container--default .select2-selection--single {
+        height: 48px; border: 1.5px solid var(--pf-border); border-radius: 10px;
+        display: flex; align-items: center; padding: 0 8px; font-weight: 500;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--single {
+        border-color: var(--pf-primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 46px; }
+</style>
+
+<div class="gw-wrapper">
+    <form action="" id="warranty-form">
+        <input type="hidden" name="id" value="{% if claim.pk %}{{claim.pk}}{% endif %}">
+        
+        <div class="gw-group">
+            <label for="sale_id" class="gw-label">NOMOR STRUK PENJUALAN</label>
+            <select name="sale_id" id="sale_id" class="form-select select2" required>
+                <option value="" disabled selected>Ketik / Cari Nomor Struk...</option>
+                {% for sale in sales %}
+                <option value="{{ sale.id }}" {% if claim.sale_id.id == sale.id %}selected{% endif %}>
+                    {{ sale.code }} - {{ sale.date_added|date:'d/m/Y' }} ({{ sale.customer_name|default:'Umum' }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="gw-group">
+            <label for="product_id" class="gw-label">BARANG YANG DISERVIS</label>
+            <select name="product_id" id="product_id" class="form-select select2" required>
+                <option value="" disabled selected>Pilih Struk Di Atas Dulu...</option>
+                {% if claim.product_id %}
+                <option value="{{ claim.product_id.id }}" selected>{{ claim.product_id.name }}</option>
+                {% endif %}
+            </select>
+        </div>
+
+        <div class="gw-group">
+            <label for="description" class="gw-label">KETERANGAN KERUSAKAN / SERVIS</label>
+            <textarea name="description" id="description" rows="3" class="gw-input" placeholder="Contoh: Baterai drop, ganti RAM, dll..." required>{% if claim.description %}{{claim.description}}{% endif %}</textarea>
+        </div>
+
+        <div class="gw-group">
+            <label for="cost" class="gw-label">BIAYA PENGELUARAN (MODAL TOKO)</label>
+            <input type="text" name="cost" id="cost" class="gw-input number-format" style="font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; color: #ef4444; font-weight: 700;" value="{% if claim.cost %}{{claim.cost|floatformat:'0'}}{% else %}0{% endif %}" required>
+            <span class="gw-hint"><i class="material-icons" style="font-size: 12px; vertical-align: middle;">info</i> Biaya ini akan memotong Potensi Keuntungan. Isi 0 jika tidak ada komponen yang dibeli.</span>
+        </div>
+
+        <div class="gw-group">
+            <label for="status" class="gw-label">STATUS KLAIM</label>
+            <select name="status" id="status" class="form-select gw-input" required>
+                <option value="0" {% if claim.status == 0 %}selected{% endif %}>Menunggu / Sedang Diproses (Servis)</option>
+                <option value="1" {% if claim.status == 1 %}selected{% endif %}>Selesai & Sudah Dikembalikan</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(function() {
+        // Inisialisasi Select2
+        $('.select2').select2({
+            width: '100%',
+            dropdownParent: $('#uni_modal')
+        });
+
+        // Event listener jika nomor struk dipilih, tarik itemnya via AJAX
+        $('#sale_id').change(function() {
+            var sale_id = $(this).val();
+            if (sale_id) {
+                $.ajax({
+                    url: "{% url 'get-sale-items' %}",
+                    data: { 'sale_id': sale_id },
+                    dataType: 'json',
+                    success: function(resp) {
+                        var html = '<option value="" disabled selected>Pilih Barang...</option>';
+                        if (resp.length > 0) {
+                            $.each(resp, function(k, v) {
+                                html += '<option value="'+v.id+'">'+v.name+'</option>';
+                            });
+                        } else {
+                            html = '<option value="" disabled selected>Tidak ada barang di struk ini.</option>';
+                        }
+                        $('#product_id').html(html);
+                    }
+                });
+            }
+        });
+
+        // Format angka sebagai Rupiah saat diketik
+        $('.number-format').on('input', function() {
+            var val = $(this).val();
+            val = val.replace(/[^0-9]/g, '');
+            if(val != '') {
+                val = parseInt(val).toLocaleString('en-US');
+            }
+            $(this).val(val);
+        });
+
+        // Pastikan nilai awal di-format jika ada
+        if($('#cost').val() != '' && $('#cost').val() != '0') {
+            var val = $('#cost').val().replace(/[^0-9]/g, '');
+            $('#cost').val(parseInt(val).toLocaleString('en-US'));
+        }
+
+        $('#warranty-form').submit(function(e) {
+            e.preventDefault();
+            var _this = $(this)
+            $('.err-msg').remove();
+            var el = $('<div>')
+            el.addClass("alert alert-danger err-msg")
+            el.hide()
+            if (_this[0].checkValidity() == false) {
+                _this[0].reportValidity();
+                return false;
+            }
+            start_loader();
+            $.ajax({
+                headers: {
+                    "X-CSRFToken": '{{csrf_token}}'
+                },
+                url: "{% url 'save-warranty-page' %}",
+                data: new FormData($(this)[0]),
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST',
+                dataType: 'json',
+                error: err => {
+                    console.log(err)
+                    alert_toast("Terjadi kesalahan.", 'error');
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp.status == 'success') {
+                        location.reload()
+                    } else if (resp.status == 'failed' && !!resp.msg) {
+                        el.text(resp.msg)
+                    } else {
+                        el.text("Terjadi kesalahan.", 'error');
+                        end_loader();
+                        console.err(resp)
+                    }
+                    _this.prepend(el)
+                    el.show('slow')
+                    $("html, body, .modal").scrollTop(0);
+                    end_loader()
+                }
+            })
+        })
+    })
+</script>

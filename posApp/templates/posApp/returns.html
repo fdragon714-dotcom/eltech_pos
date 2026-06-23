@@ -1,0 +1,274 @@
+{% extends "posApp/base.html" %}
+{% load humanize %}
+{% block pageContent %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --c-dark: #0f172a;
+        --c-border: #cbd5e1; 
+        --c-bg-light: #f8fafc;
+        --c-text-muted: #64748b;
+        --c-blue: #2563eb;
+    }
+
+    body { background-color: #f1f5f9; }
+
+    .dashboard-header {
+        display: flex; justify-content: space-between; align-items: flex-end;
+        margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--c-border);
+    }
+
+    .main-card {
+        background: #ffffff; border-radius: 12px; border: 1px solid var(--c-border);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); overflow: hidden;
+    }
+
+    .table-modern { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; font-family: 'Inter', sans-serif; }
+    .table-modern thead th {
+        background: #f8fafc; color: #475569; font-size: 0.75rem; font-weight: 700; 
+        text-transform: uppercase; letter-spacing: 0.5px; padding: 14px 16px; 
+        border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 10;
+        white-space: nowrap;
+    }
+    .table-modern tbody tr { transition: all 0.2s ease; border-bottom: 1px solid #e2e8f0; }
+    .table-modern tbody { border-bottom: 8px solid #f1f5f9; }
+    .table-modern tbody:last-child { border-bottom: none; }
+    .table-modern tbody tr:hover { background-color: #f8fafc; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .table-modern td { padding: 14px 16px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; color: var(--c-dark); line-height: 1.4; }
+
+    .btn-action { 
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px; 
+        padding: 6px 14px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; 
+        transition: all 0.2s ease; cursor: pointer; 
+        background: #eff6ff; color: #2563eb; border: 1px solid transparent; text-decoration: none;
+    }
+    .btn-action:hover { background: #3b82f6; color: white; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); }
+
+    .badge-code { 
+        font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.75rem; 
+        background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 6px; 
+        display: inline-block;
+    }
+    
+    .product-name-col { font-size: 0.9rem; font-weight: 600; color: #0f172a; }
+    .product-qty-col { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; text-align: center; }
+
+    .status-badge {
+        padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .status-supplier { background-color: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
+    .status-gudang { background-color: #fefce8; color: #ca8a04; border: 1px solid #fef08a; }
+
+    .btn-icon-only { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--c-border); background: #fff; color: var(--c-text-muted); display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; cursor: pointer; text-decoration: none;}
+    .btn-icon-only i { font-size: 16px !important; }
+    .btn-icon-only:hover { background: #f1f5f9; color: var(--c-blue); border-color: var(--c-blue); }
+    .btn-icon-only.del:hover { background: #fee2e2; color: #ef4444; border-color: #ef4444;}
+</style>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="w-100">
+        <div class="dashboard-header">
+            <div>
+                <h4 class="mb-1 fw-bold text-dark">Data Retur & Barang Cacat</h4>
+                <p class="text-muted small mb-0">Kelola riwayat pengembalian ke supplier dan barang rusak di gudang.</p>
+            </div>
+            {% if request.user.is_superuser %}
+            <div>
+                <a class="btn-action" href="{% url 'manage-return-page' %}">
+                    <i class="material-icons" style="font-size: 18px;">add_box</i> Tambah Retur
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="main-card">
+            <div class="control-bar hide-on-print" style="background: var(--c-bg-light); padding: 10px 14px; border-bottom: 2px solid #94a3b8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <div class="search-box-wrapper" style="display: flex; align-items: center; background: #ffffff; border: 1px solid var(--c-border); border-radius: 6px; padding: 4px 10px; flex-grow: 1; max-width: 300px; height: 32px;">
+                        <i class="material-icons" style="color: var(--c-text-muted); font-size: 16px; margin-right: 6px;">search</i>
+                        <input type="text" id="search-input" onkeyup="applyFilter()" placeholder="Cari Produk / Supplier..." autocomplete="off" style="border: none; outline: none; width: 100%; font-size: 0.8rem; color: var(--c-dark);">
+                    </div>
+
+                    <div class="filter-group" style="display: flex; align-items: center; gap: 8px; background: #ffffff; padding: 2px 10px; border-radius: 6px; border: 1px solid var(--c-border); height: 32px;">
+                        <select id="filter-period" onchange="applyFilter()" style="border: none; background: transparent; font-weight: 600; color: var(--c-dark); outline: none; cursor: pointer; font-size: 0.75rem;">
+                            <option value="all">Semua Waktu</option>
+                            <option value="today">Hari Ini</option>
+                            <option value="week">Minggu Ini</option>
+                            <option value="month">Bulan Ini</option>
+                            <option value="year">Tahun Ini</option>
+                        </select>
+                        <div class="filter-divider" style="width: 1px; height: 14px; background: var(--c-border);"></div>
+                        <select id="filter-month" onchange="applyFilter()" style="border: none; background: transparent; font-weight: 600; color: var(--c-dark); outline: none; cursor: pointer; font-size: 0.75rem;">
+                            <option value="">Bulan...</option>
+                            <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
+                            <option value="04">Apr</option><option value="05">Mei</option><option value="06">Jun</option>
+                            <option value="07">Jul</option><option value="08">Agu</option><option value="09">Sep</option>
+                            <option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option>
+                        </select>
+                        <select id="filter-year" onchange="applyFilter()" style="border: none; background: transparent; font-weight: 600; color: var(--c-dark); outline: none; cursor: pointer; font-size: 0.75rem;">
+                            <option value="2026">2026</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-modern w-100" id="return-table">
+                    <colgroup>
+                        <col width="5%">
+                        <col width="15%">
+                        <col width="25%">
+                        <col width="20%">
+                        <col width="15%">
+                        <col width="10%">
+                        <col width="10%">
+                    </colgroup>
+                        <tr>
+                            <th width="5%" class="text-center">No</th>
+                            <th width="15%">Tanggal</th>
+                            <th width="25%">Nama Produk</th>
+                            <th width="20%">Jenis Retur / Supplier</th>
+                            <th width="15%">Alasan / Keterangan</th>
+                            <th width="10%" class="text-center">Qty</th>
+                            <th width="10%" class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ret in returns %}
+                        <tr class="return-row" data-fulldate="{{ ret.date_added|date:'Y-m-d' }}" data-product="{{ ret.product_id.name }}" data-supplier="{{ ret.supplier_id.name|default:'' }}">
+                            <td class="text-center fw-bold row-number" style="color: #64748b; background: #f8fafc; border-right: 1px solid #e2e8f0;">{{ forloop.counter }}</td>
+                            <td class="align-middle" style="border-right: 1px dashed #e2e8f0;">
+                                <div style="font-weight: 700; font-size: 0.8rem; color: #0f172a;">{{ ret.date_added|date:'d/m/Y' }}</div>
+                                <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 4px;">{{ ret.date_added|date:'H:i' }}</div>
+                            </td>
+                            <td class="product-name-col align-middle">
+                                {{ ret.product_id.category_id.name }} {{ ret.product_id.name }}
+                                <div class="text-muted small" style="font-family: 'JetBrains Mono', monospace; font-weight:normal;">SKU: {{ ret.product_id.code }}</div>
+                            </td>
+                            <td class="align-middle">
+                                {% if ret.type == 'Kembalikan ke Supplier' %}
+                                    <span class="status-badge status-supplier">
+                                        <i class="material-icons" style="font-size: 14px;">local_shipping</i> Supplier
+                                    </span>
+                                    {% if ret.supplier_id %}
+                                    <div class="small fw-bold mt-1 text-dark" style="color: #3b82f6;"><i class="material-icons" style="font-size:12px; vertical-align:middle;">local_shipping</i> {{ ret.supplier_id.name }}</div>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="status-badge status-gudang">
+                                        <i class="material-icons" style="font-size: 14px;">inventory_2</i> Rusak Gudang
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="align-middle text-muted" style="font-size: 0.85rem;">{{ ret.reason|default:"-" }}</td>
+                            <td class="product-qty-col align-middle text-danger" style="background: #fef2f2;">-{{ ret.qty|floatformat:"0" }}</td>
+                            <td class="text-center align-middle">
+                                <a class="btn-icon-only" href="{% url 'manage-return-page' %}?id={{ ret.id }}" title="Edit">
+                                    <i class="material-icons">edit</i>
+                                </a>
+                                <button class="btn-icon-only del delete-data" type="button" data-id="{{ ret.id }}" title="Hapus">
+                                    <i class="material-icons">delete</i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="material-icons d-block mb-2" style="font-size: 48px; color: #cbd5e1;">assignment_return</i>
+                                Belum ada riwayat data retur atau barang cacat.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<script>
+    $(function() {
+        $('.delete-data').click(function() {
+            var id = $(this).attr('data-id');
+            Swal.fire({
+                title: 'Batalkan Retur?',
+                text: "Data akan dihapus dan stok barang akan dikembalikan ke inventaris gudang.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Kembalikan Stok',
+                cancelButtonText: 'Batal',
+                customClass: { popup: 'swal-premium-popup' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    delete_return(id);
+                }
+            })
+        })
+    })
+
+    function applyFilter() {
+        const period = $('#filter-period').val(), month = $('#filter-month').val(), year = $('#filter-year').val();
+        const searchQuery = $('#search-input').val().toLowerCase().trim();
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - ((today.getDay() || 7) - 1)); startOfWeek.setHours(0, 0, 0, 0);
+
+        let visibleCounter = 1; 
+        
+        $('.return-row').each(function() {
+            const dateStr = $(this).attr('data-fulldate'); if (!dateStr) return;
+            const rowDate = new Date(dateStr); rowDate.setHours(0, 0, 0, 0);
+            const product = ($(this).attr('data-product') || "").toLowerCase();
+            const supplier = ($(this).attr('data-supplier') || "").toLowerCase();
+            let isVisible = true;
+
+            if (searchQuery !== "" && !product.includes(searchQuery) && !supplier.includes(searchQuery)) isVisible = false;
+
+            if (isVisible && period !== 'all') {
+                $('#filter-month, #filter-year').prop('disabled', true).css('opacity', '0.5');
+                if (period === 'today' && rowDate.getTime() !== today.getTime()) isVisible = false;
+                else if (period === 'week' && (rowDate < startOfWeek || rowDate > today)) isVisible = false;
+                else if (period === 'month' && (rowDate.getMonth() !== today.getMonth() || rowDate.getFullYear() !== today.getFullYear())) isVisible = false;
+                else if (period === 'year' && rowDate.getFullYear() !== today.getFullYear()) isVisible = false;
+            } else if (isVisible && period === 'all') {
+                $('#filter-month, #filter-year').prop('disabled', false).css('opacity', '1');
+                const rowMonth = String(rowDate.getMonth() + 1).padStart(2, '0');
+                const rowYear = String(rowDate.getFullYear());
+                if (year !== "" && rowYear !== year) isVisible = false;
+                if (month !== "" && rowMonth !== month) isVisible = false;
+            }
+            
+            if (isVisible) { $(this).show(); $(this).find('.row-number').text(visibleCounter++); } 
+            else { $(this).hide(); }
+        });
+    }
+
+    function delete_return(id) {
+        start_loader();
+        $.ajax({
+            headers: {
+                "X-CSRFToken": '{{csrf_token}}'
+            },
+            url: "{% url 'delete-return' %}",
+            method: "POST",
+            data: { id: id },
+            dataType: "json",
+            error: err => {
+                console.log(err)
+                Swal.fire({ icon: 'error', title: 'Oops...', text: 'Terjadi kesalahan teknis.' })
+                end_loader();
+            },
+            success: function(resp) {
+                if (typeof resp == 'object' && resp.status == 'success') {
+                    location.reload();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Oops...', text: resp.msg || 'Terjadi kesalahan.' })
+                    end_loader();
+                }
+            }
+        })
+    }
+</script>
+{% endblock ScriptBlock %}
