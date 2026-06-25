@@ -64,6 +64,29 @@
     .btn-icon-only i { font-size: 16px !important; }
     .btn-icon-only:hover { background: #f1f5f9; color: var(--c-blue); border-color: var(--c-blue); }
     .btn-icon-only.del:hover { background: #fee2e2; color: #ef4444; border-color: #ef4444;}
+
+    /* Summary Cards */
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
+    .summary-card {
+        background: #fff; border-radius: 12px; border: 1px solid var(--c-border);
+        padding: 16px 20px; display: flex; align-items: center; gap: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .summary-card .icon-wrap {
+        width: 44px; height: 44px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .summary-card .icon-wrap i { font-size: 22px; }
+    .summary-card .s-label { font-size: 0.72rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+    .summary-card .s-value { font-size: 1.4rem; font-weight: 800; color: #0f172a; line-height: 1; }
+    .ic-red { background: #fee2e2; color: #ef4444; }
+    .ic-yellow { background: #fefce8; color: #ca8a04; }
+    .ic-blue { background: #eff6ff; color: #2563eb; }
+
+    /* Empty state */
+    .empty-state { padding: 60px 20px; text-align: center; }
+    .empty-state i { font-size: 52px; color: #cbd5e1; display: block; margin-bottom: 12px; }
+    .empty-state p { color: #94a3b8; font-size: 0.9rem; margin: 0; }
 </style>
 
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
@@ -80,6 +103,31 @@
                 </a>
             </div>
             {% endif %}
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="icon-wrap ic-blue"><i class="material-icons">assignment_return</i></div>
+                <div>
+                    <div class="s-label">Total Retur</div>
+                    <div class="s-value" id="total-retur">{{ returns|length }}</div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="icon-wrap ic-red"><i class="material-icons">local_shipping</i></div>
+                <div>
+                    <div class="s-label">Ke Supplier</div>
+                    <div class="s-value" id="total-supplier">0</div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="icon-wrap ic-yellow"><i class="material-icons">inventory_2</i></div>
+                <div>
+                    <div class="s-label">Rusak / Gudang</div>
+                    <div class="s-value" id="total-gudang">0</div>
+                </div>
+            </div>
         </div>
 
         <div class="main-card">
@@ -115,66 +163,80 @@
             <div class="table-responsive">
                 <table class="table table-modern w-100" id="return-table">
                     <colgroup>
-                        <col width="5%">
-                        <col width="15%">
-                        <col width="25%">
+                        <col width="4%">
+                        <col width="12%">
+                        <col width="22%">
+                        <col width="18%">
+                        <col width="10%">
                         <col width="20%">
-                        <col width="15%">
-                        <col width="10%">
-                        <col width="10%">
+                        <col width="8%">
+                        <col width="6%">
                     </colgroup>
+                    <thead>
                         <tr>
-                            <th width="5%" class="text-center">No</th>
-                            <th width="15%">Tanggal</th>
-                            <th width="25%">Nama Produk</th>
-                            <th width="20%">Jenis Retur / Supplier</th>
-                            <th width="15%">Alasan / Keterangan</th>
-                            <th width="10%" class="text-center">Qty</th>
-                            <th width="10%" class="text-center">Aksi</th>
+                            <th class="text-center">No</th>
+                            <th>Tanggal</th>
+                            <th>Nama Produk</th>
+                            <th>Jenis Retur</th>
+                            <th>Supplier</th>
+                            <th>Alasan / Keterangan</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for ret in returns %}
-                        <tr class="return-row" data-fulldate="{{ ret.date_added|date:'Y-m-d' }}" data-product="{{ ret.product_id.name }}" data-supplier="{{ ret.supplier_id.name|default:'' }}">
+                        <tr class="return-row" data-fulldate="{{ ret.date_added|date:'Y-m-d' }}" data-product="{{ ret.product_id.name }}" data-supplier="{{ ret.supplier_id.name|default:'' }}" data-type="{{ ret.type }}">
                             <td class="text-center fw-bold row-number" style="color: #64748b; background: #f8fafc; border-right: 1px solid #e2e8f0;">{{ forloop.counter }}</td>
                             <td class="align-middle" style="border-right: 1px dashed #e2e8f0;">
-                                <div style="font-weight: 700; font-size: 0.8rem; color: #0f172a;">{{ ret.date_added|date:'d/m/Y' }}</div>
-                                <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 4px;">{{ ret.date_added|date:'H:i' }}</div>
+                                <div style="font-weight: 700; font-size: 0.82rem; color: #0f172a;">{{ ret.date_added|date:'d/m/Y' }}</div>
+                                <div style="font-size: 0.72rem; color: #64748b;">{{ ret.date_added|date:'H:i' }} WIB</div>
                             </td>
-                            <td class="product-name-col align-middle">
-                                {{ ret.product_id.category_id.name }} {{ ret.product_id.name }}
-                                <div class="text-muted small" style="font-family: 'JetBrains Mono', monospace; font-weight:normal;">SKU: {{ ret.product_id.code }}</div>
+                            <td class="align-middle">
+                                <div class="product-name-col">{{ ret.product_id.category_id.name }} {{ ret.product_id.name }}</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">SKU: {{ ret.product_id.code }}</div>
                             </td>
                             <td class="align-middle">
                                 {% if ret.type == 'Kembalikan ke Supplier' %}
                                     <span class="status-badge status-supplier">
-                                        <i class="material-icons" style="font-size: 14px;">local_shipping</i> Supplier
+                                        <i class="material-icons" style="font-size: 13px;">local_shipping</i> Ke Supplier
                                     </span>
-                                    {% if ret.supplier_id %}
-                                    <div class="small fw-bold mt-1 text-dark" style="color: #3b82f6;"><i class="material-icons" style="font-size:12px; vertical-align:middle;">local_shipping</i> {{ ret.supplier_id.name }}</div>
-                                    {% endif %}
                                 {% else %}
                                     <span class="status-badge status-gudang">
-                                        <i class="material-icons" style="font-size: 14px;">inventory_2</i> Rusak Gudang
+                                        <i class="material-icons" style="font-size: 13px;">inventory_2</i> Rusak / Gudang
                                     </span>
                                 {% endif %}
                             </td>
-                            <td class="align-middle text-muted" style="font-size: 0.85rem;">{{ ret.reason|default:"-" }}</td>
-                            <td class="product-qty-col align-middle text-danger" style="background: #fef2f2;">-{{ ret.qty|floatformat:"0" }}</td>
+                            <td class="align-middle" style="font-size: 0.82rem; font-weight: 600; color: #334155;">
+                                {% if ret.supplier_id %}
+                                    <i class="material-icons" style="font-size: 13px; vertical-align: middle; color: #64748b;">storefront</i>
+                                    {{ ret.supplier_id.name }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="align-middle text-muted" style="font-size: 0.82rem;">{{ ret.reason|default:"—" }}</td>
+                            <td class="product-qty-col align-middle text-danger" style="background: #fef2f2; font-size: 1rem;">
+                                <span>-{{ ret.qty|floatformat:"0" }}</span>
+                            </td>
                             <td class="text-center align-middle">
-                                <a class="btn-icon-only" href="{% url 'manage-return-page' %}?id={{ ret.id }}" title="Edit">
-                                    <i class="material-icons">edit</i>
-                                </a>
-                                <button class="btn-icon-only del delete-data" type="button" data-id="{{ ret.id }}" title="Hapus">
-                                    <i class="material-icons">delete</i>
-                                </button>
+                                <div class="d-flex justify-content-center gap-1">
+                                    <a class="btn-icon-only" href="{% url 'manage-return-page' %}?id={{ ret.id }}" title="Edit">
+                                        <i class="material-icons">edit</i>
+                                    </a>
+                                    <button class="btn-icon-only del delete-data" type="button" data-id="{{ ret.id }}" title="Hapus">
+                                        <i class="material-icons">delete</i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="material-icons d-block mb-2" style="font-size: 48px; color: #cbd5e1;">assignment_return</i>
-                                Belum ada riwayat data retur atau barang cacat.
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="material-icons">assignment_return</i>
+                                    <p>Belum ada riwayat data retur atau barang cacat.</p>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -189,6 +251,9 @@
 {% block ScriptBlock %}
 <script>
     $(function() {
+        // Hitung summary cards saat load
+        updateSummaryCards();
+
         $('.delete-data').click(function() {
             var id = $(this).attr('data-id');
             Swal.fire({
@@ -209,13 +274,26 @@
         })
     })
 
+    function updateSummaryCards() {
+        let total = 0, supplier = 0, gudang = 0;
+        $('.return-row:visible').each(function() {
+            total++;
+            const type = $(this).attr('data-type') || '';
+            if (type === 'Kembalikan ke Supplier') supplier++;
+            else gudang++;
+        });
+        $('#total-retur').text(total);
+        $('#total-supplier').text(supplier);
+        $('#total-gudang').text(gudang);
+    }
+
     function applyFilter() {
         const period = $('#filter-period').val(), month = $('#filter-month').val(), year = $('#filter-year').val();
         const searchQuery = $('#search-input').val().toLowerCase().trim();
         const today = new Date(); today.setHours(0, 0, 0, 0);
         const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - ((today.getDay() || 7) - 1)); startOfWeek.setHours(0, 0, 0, 0);
 
-        let visibleCounter = 1; 
+        let visibleCounter = 1;
         
         $('.return-row').each(function() {
             const dateStr = $(this).attr('data-fulldate'); if (!dateStr) return;
@@ -243,14 +321,15 @@
             if (isVisible) { $(this).show(); $(this).find('.row-number').text(visibleCounter++); } 
             else { $(this).hide(); }
         });
+
+        // Update summary cards setelah filter
+        updateSummaryCards();
     }
 
     function delete_return(id) {
         start_loader();
         $.ajax({
-            headers: {
-                "X-CSRFToken": '{{csrf_token}}'
-            },
+            headers: { "X-CSRFToken": '{{csrf_token}}' },
             url: "{% url 'delete-return' %}",
             method: "POST",
             data: { id: id },
