@@ -190,6 +190,7 @@ class WarrantyClaim(models.Model):
     class Meta:
         verbose_name = "Klaim Garansi"
         verbose_name_plural = "Data Klaim Garansi"
+        unique_together = [('sale_id', 'product_id')]  # Satu produk per struk hanya bisa diklaim sekali
 
     def __str__(self):
         return f"Garansi - {self.sale_id.code} - {self.product_id.name}"

@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 import json, sys, calendar
 from datetime import date, datetime, timedelta
+from django.utils import timezone
 
 # ==========================================
 # SATPAM PENGECEK HAK AKSES (HANYA BOS)
@@ -1028,12 +1029,40 @@ def get_sale_items(request):
     sale_id = request.GET.get('sale_id')
     items = salesItems.objects.filter(sale_id=sale_id)
     resp = []
+    try:
+        sale_obj = Sales.objects.get(id=sale_id)
+    except Sales.DoesNotExist:
+        return HttpResponse(json.dumps([]), content_type="application/json")
+
     for item in items:
         brand = item.product_id.category_id.name if item.product_id.category_id else ''
         full_name = f"[{brand}] {item.product_id.name}" if brand else item.product_id.name
+        warranty_days = item.product_id.warranty or 0
+
+        # Cek apakah sudah pernah diklaim (dari struk ini)
+        is_claimed = WarrantyClaim.objects.filter(
+            sale_id=sale_obj, product_id=item.product_id
+        ).exists()
+
+        # Hitung sisa hari garansi
+        days_remaining = None
+        is_expired = False
+        expiry_date_str = None
+        if warranty_days > 0:
+            expiry_dt = sale_obj.date_added + timedelta(days=warranty_days)
+            expiry_date_str = expiry_dt.strftime('%d/%m/%Y')
+            remaining = (expiry_dt - timezone.now()).days
+            days_remaining = remaining
+            is_expired = remaining < 0
+
         resp.append({
             'id': item.product_id.id,
-            'name': full_name
+            'name': full_name,
+            'warranty_days': warranty_days,
+            'is_claimed': is_claimed,
+            'is_expired': is_expired,
+            'days_remaining': days_remaining,
+            'expiry_date': expiry_date_str,
         })
     return HttpResponse(json.dumps(resp), content_type="application/json")
 
@@ -1045,9 +1074,39 @@ def save_warranty(request):
     try:
         sale = Sales.objects.get(id=data['sale_id'])
         product = Products.objects.get(id=data['product_id'])
-        if data.get('id'):
-            # Update
-            claim = WarrantyClaim.objects.get(id=data['id'])
+        claim_id = data.get('id')
+
+        # ============================================================
+        # VALIDASI: Cek duplikat klaim (hanya untuk klaim BARU)
+        # ============================================================
+        if not claim_id:
+            already_claimed = WarrantyClaim.objects.filter(
+                sale_id=sale, product_id=product
+            ).exists()
+            if already_claimed:
+                resp['msg'] = (
+                    f'Garansi produk "{product.name}" dari struk {sale.code} '
+                    f'sudah pernah diklaim sebelumnya. Satu produk hanya dapat diklaim satu kali.'
+                )
+                return HttpResponse(json.dumps(resp), content_type="application/json")
+
+            # ============================================================
+            # VALIDASI: Cek masa berlaku garansi (hanya jika produk bergaransi)
+            # ============================================================
+            warranty_days = product.warranty or 0
+            if warranty_days > 0:
+                expiry_dt = sale.date_added + timedelta(days=warranty_days)
+                if timezone.now() > expiry_dt:
+                    expiry_str = expiry_dt.strftime('%d/%m/%Y')
+                    resp['msg'] = (
+                        f'Masa garansi produk "{product.name}" sudah habis sejak {expiry_str}. '
+                        f'Garansi tidak dapat diklaim lagi.'
+                    )
+                    return HttpResponse(json.dumps(resp), content_type="application/json")
+
+        if claim_id:
+            # Update klaim yang sudah ada
+            claim = WarrantyClaim.objects.get(id=claim_id)
             claim.sale_id = sale
             claim.product_id = product
             claim.description = data['description']
@@ -1055,7 +1114,7 @@ def save_warranty(request):
             claim.status = int(data['status'])
             claim.save()
         else:
-            # Create
+            # Buat klaim baru
             claim = WarrantyClaim(
                 sale_id=sale,
                 product_id=product,
