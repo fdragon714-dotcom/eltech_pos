@@ -914,7 +914,24 @@ def salesList(request):
         warranties = WarrantyClaim.objects.filter(sale_id=sale)
         total_warranty = sum(w.cost for w in warranties)
         data['total_warranty'] = total_warranty
-        
+
+        # Buat map: product_id -> info klaim (untuk badge "Sudah Diklaim" di kolom garansi)
+        claimed_map = {}
+        for w in warranties:
+            claimed_map[w.product_id.id] = {
+                'date': w.date_added.strftime('%d/%m/%Y'),
+                'description': w.description,
+                'cost': int(w.cost),
+                'status': w.status,  # 0=Proses, 1=Selesai
+            }
+
+        # Enriching setiap item dengan status klaim
+        enriched_items = list(data['items'])
+        for item in enriched_items:
+            item.is_claimed = item.product_id.id in claimed_map
+            item.claim_info = claimed_map.get(item.product_id.id, {})
+        data['items'] = enriched_items
+
         # Laba Bersih
         data['net_profit'] = sale.grand_total - total_hpp - total_warranty
         

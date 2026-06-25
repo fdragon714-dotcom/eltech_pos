@@ -126,6 +126,7 @@
     .w-badge:hover { transform: scale(1.05); filter: brightness(0.95); }
     .w-active { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
     .w-expired { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .w-claimed { background: #ede9fe; color: #7c3aed; border: 1px solid #c4b5fd; }
 
     .btn-icon-only { width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--c-border); background: #fff; color: var(--c-text-muted); display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; }
     .btn-icon-only i { font-size: 14px !important; }
@@ -406,6 +407,11 @@
                                       data-product="{{ item.product_id.name }}"
                                       data-purchased="{{ sale.date_added|date:'Y-m-d' }}" 
                                       data-duration="{{ item.product_id.warranty|default:0 }}"
+                                      data-claimed="{% if item.is_claimed %}1{% else %}0{% endif %}"
+                                      data-claim-date="{{ item.claim_info.date|default:'' }}"
+                                      data-claim-desc="{{ item.claim_info.description|default:'' }}"
+                                      data-claim-cost="{{ item.claim_info.cost|default:0 }}"
+                                      data-claim-status="{{ item.claim_info.status|default:'' }}"
                                       title="Klik untuk melihat detail garansi">...</span>
                             </td>
 
@@ -546,10 +552,13 @@
     // LOGIKA KLIK GARANSI (MENAMPILKAN POP-UP SWEETALERT)
     // =========================================================================
     $(document).on('click', '.warranty-calc', function() {
-        const durationDays = parseInt($(this).data('duration')) || 0;
-        
+        const durationDays = parseInt($(this).attr('data-duration')) || 0;
+        const isClaimed    = $(this).attr('data-claimed') == '1';
+        const productName  = $(this).attr('data-product');
+        const saleCode     = $(this).attr('data-code');
+
         // Jika tidak ada garansi, tampilkan info singkat saja
-        if (durationDays === 0) {
+        if (durationDays === 0 && !isClaimed) {
             Swal.fire({
                 title: 'Info Garansi',
                 text: 'Produk ini tidak memiliki perlindungan garansi toko.',
@@ -560,23 +569,48 @@
             return;
         }
 
-        const purchasedStr = $(this).data('purchased');
-        const productName = $(this).data('product');
-        const saleCode = $(this).data('code');
+        // ── KONDISI: GARANSI SUDAH DIKLAIM ──────────────────────────
+        if (isClaimed) {
+            const claimDate   = $(this).attr('data-claim-date') || '-';
+            const claimDesc   = $(this).attr('data-claim-desc') || '-';
+            const claimCost   = parseInt($(this).attr('data-claim-cost')) || 0;
+            const claimStatus = $(this).attr('data-claim-status');
+            const statusLabel = claimStatus == '1'
+                ? '<span style="color:#059669;font-weight:700;">✅ Selesai & Sudah Dikembalikan</span>'
+                : '<span style="color:#d97706;font-weight:700;">🔧 Masih Dalam Proses Servis</span>';
+            Swal.fire({
+                title: 'Garansi Sudah Diklaim',
+                html: `
+                    <div style="background:#ede9fe;color:#7c3aed;padding:12px;border-radius:8px;border:1px solid #c4b5fd;margin-bottom:20px;font-weight:bold;font-size:1rem;">
+                        <i class="material-icons" style="vertical-align:middle;font-size:18px;">verified</i> GARANSI TELAH DIKLAIM OLEH PELANGGAN
+                    </div>
+                    <table style="width:100%;text-align:left;font-size:0.9rem;border-collapse:collapse;">
+                        <tr><td style="padding:9px 0;border-bottom:1px solid #eee;color:#64748b;">No. Struk</td><td style="padding:9px 0;border-bottom:1px solid #eee;font-weight:bold;color:#0f172a;">${saleCode}</td></tr>
+                        <tr><td style="padding:9px 0;border-bottom:1px solid #eee;color:#64748b;">Nama Produk</td><td style="padding:9px 0;border-bottom:1px solid #eee;font-weight:bold;color:#0f172a;">${productName}</td></tr>
+                        <tr><td style="padding:9px 0;border-bottom:1px solid #eee;color:#64748b;">Tanggal Klaim</td><td style="padding:9px 0;border-bottom:1px solid #eee;font-weight:bold;color:#0f172a;">${claimDate}</td></tr>
+                        <tr><td style="padding:9px 0;border-bottom:1px solid #eee;color:#64748b;">Keterangan Servis</td><td style="padding:9px 0;border-bottom:1px solid #eee;color:#0f172a;">${claimDesc}</td></tr>
+                        <tr><td style="padding:9px 0;border-bottom:1px solid #eee;color:#64748b;">Biaya Servis</td><td style="padding:9px 0;border-bottom:1px solid #eee;font-weight:bold;color:#dc2626;">Rp ${claimCost.toLocaleString('id-ID')}</td></tr>
+                        <tr><td style="padding:9px 0;color:#64748b;">Status</td><td style="padding:9px 0;">${statusLabel}</td></tr>
+                    </table>
+                `,
+                buttonsStyling: false,
+                customClass: { popup: 'swal-premium-popup', confirmButton: 'swal-premium-confirm' },
+                confirmButtonText: 'Tutup',
+                width: '460px'
+            });
+            return;
+        }
 
-        // Kalkulasi Tanggal
-        const purchaseDate = new Date(purchasedStr); 
+        // ── KONDISI: BELUM DIKLAIM — tampilkan detail sisa hari ─────
+        const purchasedStr = $(this).attr('data-purchased');
+        const purchaseDate = new Date(purchasedStr);
         purchaseDate.setHours(0, 0, 0, 0);
-        
-        const expiryDate = new Date(purchaseDate); 
+        const expiryDate = new Date(purchaseDate);
         expiryDate.setDate(expiryDate.getDate() + durationDays);
-        
-        const today = new Date(); 
+        const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
         const diffDays = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        
-        // Format Tanggal (DD/MM/YYYY)
+
         const formatDate = (date) => {
             const d = date.getDate().toString().padStart(2, '0');
             const m = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -584,29 +618,27 @@
             return `${d}/${m}/${y}`;
         };
 
-        // UI Status
         let statusHtml = '';
         if (diffDays > 0) {
-            statusHtml = `<div style="background: #ecfdf5; color: #059669; padding: 12px; border-radius: 8px; border: 1px solid #a7f3d0; margin-bottom: 20px; font-weight: bold; font-size: 1.1rem;">
-                            <i class="material-icons" style="vertical-align: middle;">check_circle</i> GARANSI AKTIF (Sisa ${diffDays} Hari)
+            statusHtml = `<div style="background:#ecfdf5;color:#059669;padding:12px;border-radius:8px;border:1px solid #a7f3d0;margin-bottom:20px;font-weight:bold;font-size:1.1rem;">
+                            <i class="material-icons" style="vertical-align:middle;">check_circle</i> GARANSI AKTIF (Sisa ${diffDays} Hari)
                           </div>`;
         } else {
-            statusHtml = `<div style="background: #fef2f2; color: #dc2626; padding: 12px; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 20px; font-weight: bold; font-size: 1.1rem;">
-                            <i class="material-icons" style="vertical-align: middle;">cancel</i> GARANSI TELAH HABIS
+            statusHtml = `<div style="background:#fef2f2;color:#dc2626;padding:12px;border-radius:8px;border:1px solid #fecaca;margin-bottom:20px;font-weight:bold;font-size:1.1rem;">
+                            <i class="material-icons" style="vertical-align:middle;">cancel</i> GARANSI TELAH HABIS
                           </div>`;
         }
 
-        // Tampilkan SweetAlert
         Swal.fire({
             title: 'Detail Perlindungan Garansi',
             html: `
                 ${statusHtml}
-                <table style="width: 100%; text-align: left; font-size: 0.95rem; border-collapse: collapse; margin-top: 10px;">
-                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #64748b;">No. Struk</td><td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #0f172a;">${saleCode}</td></tr>
-                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #64748b;">Nama Produk</td><td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #0f172a;">${productName}</td></tr>
-                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #64748b;">Masa Berlaku</td><td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #0f172a;">${durationDays} Hari</td></tr>
-                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #64748b;">Tgl Pembelian</td><td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #0f172a;">${formatDate(purchaseDate)}</td></tr>
-                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #64748b;">Tgl Berakhir</td><td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #0f172a;">${formatDate(expiryDate)}</td></tr>
+                <table style="width:100%;text-align:left;font-size:0.95rem;border-collapse:collapse;margin-top:10px;">
+                    <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#64748b;">No. Struk</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:bold;color:#0f172a;">${saleCode}</td></tr>
+                    <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#64748b;">Nama Produk</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:bold;color:#0f172a;">${productName}</td></tr>
+                    <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#64748b;">Masa Berlaku</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:bold;color:#0f172a;">${durationDays} Hari</td></tr>
+                    <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#64748b;">Tgl Pembelian</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:bold;color:#0f172a;">${formatDate(purchaseDate)}</td></tr>
+                    <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#64748b;">Tgl Berakhir</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:bold;color:#0f172a;">${formatDate(expiryDate)}</td></tr>
                 </table>
             `,
             buttonsStyling: false,
@@ -649,14 +681,24 @@
     function calculateWarranties() {
         const today = new Date(); today.setHours(0, 0, 0, 0);
         $('.warranty-calc').each(function() {
-            const purchaseDateStr = $(this).data('purchased');
-            const durationDays = parseInt($(this).data('duration')) || 0; 
-            if (durationDays === 0) { $(this).hide(); return; }
-            const purchaseDate = new Date(purchaseDateStr); purchaseDate.setHours(0, 0, 0, 0);
+            const durationDays = parseInt($(this).attr('data-duration')) || 0;
+            const isClaimed    = $(this).attr('data-claimed') == '1';
+
+            // Jika non-garansi dan belum pernah diklaim, sembunyikan
+            if (durationDays === 0 && !isClaimed) { $(this).hide(); return; }
+
+            // PRIORITAS PERTAMA: Jika sudah diklaim, tampilkan badge ungu
+            if (isClaimed) {
+                $(this).removeClass('w-active w-expired').addClass('w-claimed').text('✔ Diklaim').show();
+                return;
+            }
+
+            // Hitung sisa hari untuk yang belum diklaim
+            const purchaseDate = new Date($(this).attr('data-purchased')); purchaseDate.setHours(0, 0, 0, 0);
             const expiryDate = new Date(purchaseDate); expiryDate.setDate(expiryDate.getDate() + durationDays);
             const diffDays = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-            if (diffDays > 0) { $(this).removeClass('w-expired').addClass('w-active').text(diffDays + ' Hr'); } 
-            else { $(this).removeClass('w-active').addClass('w-expired').text('Habis'); }
+            if (diffDays > 0) { $(this).removeClass('w-expired w-claimed').addClass('w-active').text(diffDays + ' Hr'); }
+            else { $(this).removeClass('w-active w-claimed').addClass('w-expired').text('Habis'); }
         });
     }
 
