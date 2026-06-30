@@ -5,6 +5,6 @@ env/
 __pycache__/
 *.pyc
 db.sqlite3
-media/
+# media/  <-- Dinonaktifkan agar gambar bisa di-copy ke dalam container
 staticfiles/
 .env
