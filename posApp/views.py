@@ -484,8 +484,11 @@ def save_product(request):
             # ==========================================
             # PENCEGAHAN NILAI KOSONG (ANTI-ERROR)
             # ==========================================
-            stock_input = data.get('stock', 0)
-            if stock_input == '': stock_input = 0
+            if 'stock' in data:
+                stock_input = data.get('stock', 0)
+                if stock_input == '': stock_input = 0
+            else:
+                stock_input = None
             
             warranty_input = data.get('warranty', 0)
             if warranty_input == '': warranty_input = 0
@@ -510,7 +513,8 @@ def save_product(request):
                 if 'hpp' in data:
                     prod.hpp = float(data['hpp'])
                 prod.status = data['status']
-                prod.stock = int(stock_input)
+                if stock_input is not None:
+                    prod.stock = int(stock_input)
                 prod.warranty = int(warranty_input)
                 
                 if 'image' in files:
@@ -526,7 +530,7 @@ def save_product(request):
                     price=final_price,
                     hpp=float(data.get('hpp', 0)),
                     status=data['status'],
-                    stock=int(stock_input),
+                    stock=int(stock_input) if stock_input is not None else 0,
                     warranty=int(warranty_input)
                 )
                 if 'image' in files:
