@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: eltech_pos
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_DEBUG=False
+    volumes:
+      # Volume permanen untuk gambar produk & kategori (media/)
+      - pos_media:/app/media
+      # Volume permanen untuk database SQLite (data/)
+      - pos_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  # Deklarasi volume agar data tidak hilang saat container restart/rebuild
+  pos_media:
+    name: eltech_pos_media
+  pos_data:
+    name: eltech_pos_data
