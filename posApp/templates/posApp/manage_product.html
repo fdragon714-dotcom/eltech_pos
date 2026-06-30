@@ -572,7 +572,18 @@
                                     document.querySelector('.swal2-container').style.zIndex = '999999'; 
                                 }
                             }).then(() => { 
-                                location.reload(); 
+                                if ($('#product-select').length > 0 && resp.product) {
+                                    var newOption = new Option(resp.product.code + ' - ' + resp.product.name, resp.product.id, false, true);
+                                    $(newOption).attr('data-price', resp.product.price);
+                                    $(newOption).attr('data-name', resp.product.name);
+                                    $(newOption).attr('data-code', resp.product.code);
+                                    $('#product-select').append(newOption);
+                                    if($.fn.select2) {
+                                        $('#product-select').trigger('change');
+                                    }
+                                } else {
+                                    location.reload(); 
+                                }
                             });
                         }, 300);
                         

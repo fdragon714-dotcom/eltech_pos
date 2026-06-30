@@ -538,6 +538,12 @@ def save_product(request):
                 prod.save()
                 
             resp['status'] = 'success'
+            resp['product'] = {
+                'id': prod.id,
+                'code': prod.code,
+                'name': f"{category.name} {prod.name}" if category else prod.name,
+                'price': float(prod.price)
+            }
         except Exception as e:
             resp['status'] = 'failed'
             resp['msg'] = str(e)
